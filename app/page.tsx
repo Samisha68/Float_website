@@ -17,10 +17,10 @@ export default function Home() {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-gradient-to-b from-transparent to-black" />
 
       <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 pt-6 md:px-10">
-        <div className="flex items-center rounded-full bg-neutral-900/90 px-3 py-2 backdrop-blur">
+        <div className="flex items-center rounded-xl bg-white px-2 py-1.5 shadow-[0_0_0_1px_rgba(113,113,113,0.35)]">
           <img
             alt="float"
-            className="h-9 w-9 invert"
+            className="h-14 w-14 md:h-16 md:w-16"
             height="407"
             src="/float-logo.svg"
             width="407"
