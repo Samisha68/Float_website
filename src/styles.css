@@ -1,0 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&display=swap");
+@import "tailwindcss";
+
+:root {
+  font-family: "Readex Pro", system-ui, -apple-system, sans-serif;
+  color: #ffffff;
+  background: #000000;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #000000;
+}
+
+.hero-title {
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  video {
+    display: none;
+  }
+}
