@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PrivyProvider, useLogin, usePrivy } from "@privy-io/react-auth";
 import type { Payload } from "./App";
-const appId = (import.meta as ImportMeta & { env: Record<string, string> }).env.VITE_PRIVY_APP_ID;
+const appId = import.meta.env.VITE_PRIVY_APP_ID;
 
 export default function Waitlist({ payload, onClose }: { payload: Payload; onClose: () => void }) {
   if (!appId) return <div className="auth-error" role="alert">Sign-in is being set up. Please check back shortly.<br /><button className="text-link" onClick={onClose}>Dismiss</button></div>;
@@ -34,7 +34,10 @@ function Saver({ payload, onClose }: { payload: Payload; onClose: () => void }) 
       if (!token) throw new Error("Your session expired. Close this and try again.");
       const response = await fetch("/api/waitlist", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(payload), signal: request.signal });
       const result = await response.json().catch(() => null);
-      if (!response.ok || result?.ok !== true) throw new Error(response.status === 401 ? "Your session expired. Close this and try again." : "Please try again in a moment.");
+      if (!response.ok || result?.ok !== true) {
+        const detail = import.meta.env.DEV && result?.code ? ` (${result.code})` : "";
+        throw new Error(response.status === 401 ? "Your session expired. Close this and try again." : `Please try again in a moment.${detail}`);
+      }
       setStatus("success");
     } catch (cause) {
       setStatus("error");
