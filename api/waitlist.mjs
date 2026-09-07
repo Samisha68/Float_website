@@ -1,8 +1,10 @@
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import { neon } from "@neondatabase/serverless";
+import postgres from "postgres";
 import { createWaitlistHandler } from "../server/waitlist.mjs";
 
 const appId = process.env.PRIVY_APP_ID;
+let client;
+const db = () => (client ??= postgres(process.env.DATABASE_URL, { prepare: false, max: 1, idle_timeout: 20, connect_timeout: 10 }));
 const keys = appId ? createRemoteJWKSet(new URL(`https://auth.privy.io/api/v1/apps/${encodeURIComponent(appId)}/jwks.json`), { timeoutDuration: 5000 }) : null;
 export default createWaitlistHandler({
   configured: () => Boolean(appId && process.env.PRIVY_APP_SECRET && process.env.DATABASE_URL),
@@ -18,10 +20,9 @@ export default createWaitlistHandler({
     return profile.linked_accounts.find(account => account.type === "email")?.address
       ?? profile.linked_accounts.find(account => account.type === "google_oauth")?.email;
   },
-  save: async ({ privyId, email }) => {
-    const sql = neon(process.env.DATABASE_URL);
-    await sql`INSERT INTO waitlist_entries (privy_id, email, consent_version)
-      VALUES (${privyId}, ${email}, 'early-access-v1')
+  save: async ({ privyId, email, business, community, socials }) => {
+    await db()`INSERT INTO waitlist_entries (privy_id, email, business, community_interest, socials, consent_version)
+      VALUES (${privyId}, ${email}, ${business}, ${community}, ${socials}, 'early-access-v1')
       ON CONFLICT (privy_id) DO NOTHING`;
   },
 });

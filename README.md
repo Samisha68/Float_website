@@ -21,7 +21,7 @@ What's here today is the pre-launch page and the waitlist businesses use to regi
 interest:
 
 - a single landing page (React + TypeScript + Vite, deployed on Vercel)
-- a waitlist behind Privy sign-in, backed by a private Neon Postgres table
+- a waitlist behind Privy sign-in, backed by a private Supabase Postgres table
 
 ## Local preview
 
@@ -42,8 +42,9 @@ npm run build   # production build
 
 ## Deployment
 
-1. Attach a private Neon Postgres database to the Vercel project and run the `db/`
-   migrations once, in order, in its SQL editor.
+1. In Supabase, run the `db/` migrations once, in order, in the SQL editor. Take the
+   connection string from Project Settings → Database → Connection string → **Transaction
+   pooler**, and use it as `DATABASE_URL`.
 2. Set `DATABASE_URL`, `PRIVY_APP_ID` and `PRIVY_APP_SECRET` as **server-only** Vercel
    environment variables, and `VITE_PRIVY_APP_ID` to the same Privy app ID. Never commit
    secrets, and never prefix a server credential with `VITE_`.
@@ -62,11 +63,18 @@ place.
 Signing in *is* the signup — there is no form. The endpoint verifies the token's signature,
 issuer, audience, expiry and `did:privy:` subject, then reads the contact email **from
 Privy's API rather than from the request**, so a forged email or ID in the body is ignored.
-It stores the Privy ID, verified email, timestamp and consent version, and nothing else.
+Signing in verifies the identity; a short form then collects the business, whether they want
+to be part of a credit-reputation community, and optionally their socials. The endpoint
+stores the Privy ID, verified email, those three answers, a timestamp and a consent version.
 
-Consent is shown in the Privy sign-in dialog before the visitor completes it. The `name` and
-`business` columns are retained but no longer written; `db/002_signup_only.sql` relaxes them
-rather than dropping them, so anything captured under the earlier form survives.
+Supabase serves the `public` schema over PostgREST using a browser-safe anon key, so the
+table is closed off explicitly: `db/003_signup_fields.sql` enables row-level security with no
+policies and revokes `anon` and `authenticated`. Only the owning role this API connects as
+can reach the rows. Verify this after running the migrations — an exposed table would leak
+every signup email.
+
+The unused `name` column from the original form is left in place and nullable rather than
+dropped, so anything captured earlier survives.
 
 The table has no public read endpoint and the browser never receives database credentials.
 Repeat submissions are idempotent by Privy ID. Any failure in configuration, identity lookup

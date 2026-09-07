@@ -17,6 +17,11 @@ export function createWaitlistHandler({ configured, verify, getEmail, save, log 
       body = JSON.parse(raw);
     } catch { return reply(400, "INVALID_JSON"); }
     if (!body || typeof body !== "object" || Array.isArray(body)) return reply(400, "INVALID_JSON");
+    const text = (value, max) => typeof value === "string" && value.length <= max && !/[\u0000-\u001f\u007f]/.test(value);
+    const socials = body.socials == null || body.socials === "" ? null : body.socials;
+    if (!text(body.business, 160) || body.business.trim().length === 0) return reply(400, "INVALID_BUSINESS");
+    if (typeof body.community !== "boolean") return reply(400, "INVALID_COMMUNITY");
+    if (socials !== null && !text(socials, 200)) return reply(400, "INVALID_SOCIALS");
     if (!configured()) { log(JSON.stringify({ event: "waitlist.unconfigured", requestId })); return reply(503, "SIGNUP_UNAVAILABLE"); }
     let identity;
     try { identity = await verify(authorization.slice(7)); }
@@ -29,7 +34,7 @@ export function createWaitlistHandler({ configured, verify, getEmail, save, log 
     try {
       const email = await getEmail(identity.sub);
       if (typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return reply(422, "VERIFIED_EMAIL_REQUIRED");
-      await save({ privyId: identity.sub, email: email.toLowerCase() });
+      await save({ privyId: identity.sub, email: email.toLowerCase(), business: body.business.trim(), community: body.community, socials: socials === null ? null : socials.trim() || null });
       log(JSON.stringify({ event: "waitlist.saved", requestId }));
       return reply(200);
     } catch (error) {

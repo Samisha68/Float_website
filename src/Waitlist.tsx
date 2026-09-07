@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { PrivyProvider, useLogin, usePrivy } from "@privy-io/react-auth";
 const appId = (import.meta as ImportMeta & { env: Record<string, string> }).env.VITE_PRIVY_APP_ID;
 
@@ -11,7 +11,7 @@ export default function Waitlist({ onClose }: { onClose: () => void }) {
 
 function Signup({ onClose }: { onClose: () => void }) {
   const { ready, authenticated, user, getAccessToken } = usePrivy();
-  const [status, setStatus] = useState<"sending" | "success" | "error">("sending");
+  const [status, setStatus] = useState<"form" | "sending" | "success">("form");
   const [error, setError] = useState("");
   const started = useRef(false);
   const joined = useRef(false);
@@ -25,7 +25,7 @@ function Signup({ onClose }: { onClose: () => void }) {
   const email = user?.email?.address || user?.google?.email || "";
 
   // Signing in is the signup: the verified identity is the whole record.
-  const join = useCallback(async () => {
+  const join = useCallback(async (payload: Record<string, unknown>) => {
     if (busy.current) return;
     busy.current = true;
     setStatus("sending"); setError("");
@@ -34,12 +34,12 @@ function Signup({ onClose }: { onClose: () => void }) {
     try {
       const token = await getAccessToken();
       if (!token) throw new Error("Your session expired. Close this window and sign in again.");
-      const response = await fetch("/api/waitlist", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: "{}", signal: request.signal });
+      const response = await fetch("/api/waitlist", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(payload), signal: request.signal });
       const result = await response.json().catch(() => null);
       if (!response.ok || result?.ok !== true) throw new Error(response.status === 401 ? "Your session expired. Close this window and sign in again." : "Please try again in a moment.");
       setStatus("success");
     } catch (cause) {
-      setStatus("error");
+      setStatus("form");
       setError(cause instanceof Error && cause.name === "AbortError" ? "That took longer than expected. Please try again." : cause instanceof TypeError ? "Check your connection and try again." : cause instanceof Error ? cause.message : "Please try again.");
     } finally { clearTimeout(timeout); busy.current = false; }
   }, [getAccessToken]);
@@ -53,8 +53,7 @@ function Signup({ onClose }: { onClose: () => void }) {
     if (!ready || !authenticated || joined.current) return;
     joined.current = true;
     dialog.current?.showModal();
-    void join();
-  }, [ready, authenticated, join]);
+  }, [ready, authenticated]);
   useEffect(() => {
     if (!ready || !authenticated) return;
     const previous = document.body.style.overflow;
@@ -65,6 +64,14 @@ function Signup({ onClose }: { onClose: () => void }) {
 
   if (!authenticated) return <div className="auth-status" role="status">{error || (!ready ? "Opening secure sign-in…" : "Complete sign-in to continue.")}<br /><button className="text-link" onClick={onClose}>Cancel</button>{error && <button className="text-link" onClick={() => { setError(""); login(); }}>Try again</button>}</div>;
 
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    if (!form.reportValidity()) return;
+    const data = new FormData(form);
+    void join({ business: String(data.get("business") ?? ""), community: data.get("community") === "on", socials: String(data.get("socials") ?? "") });
+  }
+
   let body: ReactNode;
   if (status === "success") body = <div role="status">
     <div className="success-mark" aria-hidden="true">✓</div>
@@ -72,15 +79,19 @@ function Signup({ onClose }: { onClose: () => void }) {
     <p className="dialog-sub">We’ll be in touch{email && <> at {email}</>} when it’s your turn to get started.</p>
     <button className="text-link" onClick={() => dialog.current?.close()}>Back to Float</button>
   </div>;
-  else if (status === "error") body = <div role="alert">
-    <h2 id="signup-title">We couldn’t save your place.</h2>
-    <p className="dialog-sub">{error}</p>
-    <button className="text-link" onClick={() => void join()}>Try again</button>
-  </div>;
-  else body = <div role="status">
-    <h2 id="signup-title">Saving your place…</h2>
+  else body = <>
+    <h2 id="signup-title">Tell us a little.</h2>
     <p className="dialog-sub">{email}</p>
-  </div>;
+    <form onSubmit={submit} aria-busy={status === "sending"}><fieldset disabled={status === "sending"}>
+      <label htmlFor="business">What’s your business?</label>
+      <input id="business" name="business" required maxLength={160} autoComplete="organization" placeholder="What you do, or plan to do" pattern={".*\\S.*"} />
+      <label className="check"><input type="checkbox" name="community" /><span>I’d like to be part of a community built on credit reputation.</span></label>
+      <label htmlFor="socials">Socials <span className="optional">optional</span></label>
+      <input id="socials" name="socials" maxLength={200} placeholder="@handle or a link" />
+      {error && <p className="form-error" role="alert">{error}</p>}
+      <button className="text-link form-submit" type="submit">{status === "sending" ? "Saving your place…" : "Save my place"}</button>
+    </fieldset></form>
+  </>;
 
   return <dialog ref={dialog} className="waitlist-dialog" aria-labelledby="signup-title" onClose={onClose}>
     <div className="dialog-content">
