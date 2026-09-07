@@ -89,7 +89,7 @@ function Signup({ onClose }: { onClose: () => void }) {
       <label htmlFor="socials">Socials <span className="optional">optional</span></label>
       <input id="socials" name="socials" maxLength={200} placeholder="@handle or a link" />
       {error && <p className="form-error" role="alert">{error}</p>}
-      <button className="text-link form-submit" type="submit">{status === "sending" ? "Saving your place…" : "Save my place"}</button>
+      <button className="text-link cta-link form-submit" type="submit">{status === "sending" ? "Saving your place…" : "Save my place"}</button>
     </fieldset></form>
   </>;
 

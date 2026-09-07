@@ -58,6 +58,12 @@ label { display: block; font-size: 13px; color: #ccc; margin: 20px 0 8px; }
 .optional { color: #7e7c79; }
 input { display: block; width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid #ffffff40; border-radius: 0; background: transparent; color: #fff; font-size: 16px; min-height: 48px; }
 input::placeholder { color: #747474; }
+/* Chrome paints its own pale autofill background, which breaks straight through the dark dialog. */
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff; -webkit-box-shadow: 0 0 0 1000px #111 inset; caret-color: #fff;
+  transition: background-color 8000s ease-in-out 0s;
+}
+.waitlist-dialog input:not([type="checkbox"]):focus-visible { outline: none; border-bottom-color: #fff; box-shadow: 0 1px 0 #fff; }
 .check { display: flex; align-items: flex-start; gap: 12px; margin: 26px 0 4px; font-size: 13px; line-height: 1.5; color: #ccc; cursor: pointer; }
 .check input { width: 18px; height: 18px; min-height: 0; flex: none; margin-top: 1px; accent-color: #f4f2ef; cursor: pointer; }
 .form-error { font-size: 13px; color: #ffb5b5; line-height: 1.5; margin: 18px 0 0; }
