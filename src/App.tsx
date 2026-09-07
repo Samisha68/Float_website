@@ -29,10 +29,9 @@ export default function App() {
         <span className="headline-half headline-left"><span className="headline-line">The future</span><span className="headline-line">of credit</span></span>{" "}
         <span className="headline-half headline-right"><span className="headline-line">starts with</span><em className="headline-line">reputation.</em></span>
       </h1>
-      <p className="subheading">We believe in your beginnings.</p>
     </main>
     <div className="waitlist-anchor">
-      <button className="text-link" onClick={() => setJoining(true)} disabled={joining}>Join the waitlist</button>
+      <button className="cta" onClick={() => setJoining(true)} disabled={joining}>Join the waitlist</button>
       {joining && <Suspense fallback={<p className="auth-status" role="status">Opening secure sign-in…</p>}><Waitlist onClose={() => setJoining(false)} /></Suspense>}
     </div>
     <footer className="footer">© {new Date().getFullYear()} Float</footer>

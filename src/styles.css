@@ -33,8 +33,11 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 1px solid 
 .headline-right { grid-column: 3; padding-top: .85em; text-align: right; }
 .headline-line { display: block; }
 .headline em { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; font-size: 1.2em; letter-spacing: -.035em; line-height: 1.02; }
-.subheading { margin: 30px auto 0; max-width: var(--measure); font-size: 14px; line-height: 1.6; letter-spacing: .015em; color: #b3b0ac; }
 .waitlist-anchor { position: relative; align-self: center; justify-self: center; text-align: center; }
+.cta { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 32px; border: 0; border-radius: 999px; background: #f4f2ef; color: #050505; font-size: 15px; font-weight: 500; letter-spacing: .01em; box-shadow: 0 4px 44px #00000066; transition: background-color .2s ease-out, transform .2s ease-out; }
+.cta:hover { background: #ffffff; transform: translateY(-1px); }
+.cta:active { transform: translateY(0); }
+.cta:disabled { background: #9a9793; color: #1a1a1a; transform: none; }
 .text-link { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border: 0; border-radius: 0; background: transparent; color: #eee; padding: 10px 0; font-size: 14px; letter-spacing: .01em; line-height: 1.5; }
 .text-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: 8px; height: 1px; background: currentColor; opacity: 0; transform: scaleX(.85); transform-origin: left; transition: opacity .2s, transform .2s; }
 .text-link:hover::after { opacity: .5; transform: scaleX(1); }
@@ -60,10 +63,10 @@ input::placeholder { color: #747474; }
 .form-error { font-size: 13px; color: #ffb5b5; line-height: 1.5; }
 .success-mark { font-size: 32px; margin-bottom: 24px; }
 @media (prefers-reduced-motion: no-preference) {
-  .brand, .waitlist-anchor, .footer { animation: arrive 1.2s .15s both; }
+  .brand, .footer { animation: arrive 1.2s .15s both; }
+  .waitlist-anchor { animation: arrive 1.2s .5s both; }
   .headline-left { animation: arrive 1.25s .12s both; }
   .headline-right { animation: arrive 1.4s .3s both; }
-  .subheading { animation: arrive 1.3s .45s both; }
   @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 }
 @media (max-width: 760px) {
@@ -75,13 +78,11 @@ input::placeholder { color: #747474; }
   .headline { max-width: none; grid-template-columns: minmax(0, 1fr); gap: 28px; font-size: clamp(38px, 9.8vw, 66px); line-height: 1.06; }
   .headline-left, .headline-right { grid-column: 1; }
   .headline-right { padding: 0; text-align: right; }
-  .subheading { position: absolute; bottom: 150px; left: var(--edge); right: var(--edge); max-width: none; margin: 0; font-size: 13px; text-align: center; color: #d2cec8; }
   .footer { font-size: 10px; }
 }
 @media (max-height: 550px) and (min-width: 761px) {
   .stage { min-height: 520px; grid-template-rows: 74px 1fr 75px 32px; }
   .hero { margin: 0; }
   .headline { font-size: clamp(34px, 3.6vw, 54px); }
-  .subheading { margin-top: 12px; font-size: 13px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
