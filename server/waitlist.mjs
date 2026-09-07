@@ -16,8 +16,7 @@ export function createWaitlistHandler({ configured, verify, getEmail, save, log 
       if (Buffer.byteLength(raw) > 4096) return reply(413, "BODY_TOO_LARGE");
       body = JSON.parse(raw);
     } catch { return reply(400, "INVALID_JSON"); }
-    const text = (value, max) => typeof value === "string" && value.trim().length > 0 && value.length <= max && !/[\u0000-\u001f\u007f]/.test(value);
-    if (!body || Array.isArray(body) || !text(body.name, 100) || !text(body.business, 160)) return reply(400, "INVALID_BUSINESS_DETAILS");
+    if (!body || typeof body !== "object" || Array.isArray(body)) return reply(400, "INVALID_JSON");
     if (!configured()) { log(JSON.stringify({ event: "waitlist.unconfigured", requestId })); return reply(503, "SIGNUP_UNAVAILABLE"); }
     let identity;
     try { identity = await verify(authorization.slice(7)); }
@@ -30,7 +29,7 @@ export function createWaitlistHandler({ configured, verify, getEmail, save, log 
     try {
       const email = await getEmail(identity.sub);
       if (typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return reply(422, "VERIFIED_EMAIL_REQUIRED");
-      await save({ privyId: identity.sub, email: email.toLowerCase(), name: body.name.trim(), business: body.business.trim() });
+      await save({ privyId: identity.sub, email: email.toLowerCase() });
       log(JSON.stringify({ event: "waitlist.saved", requestId }));
       return reply(200);
     } catch (error) {

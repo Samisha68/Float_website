@@ -21,7 +21,7 @@ What's here today is the pre-launch page and the waitlist businesses use to regi
 interest:
 
 - a single landing page (React + TypeScript + Vite, deployed on Vercel)
-- a waitlist form behind Privy sign-in, backed by a private Neon Postgres table
+- a waitlist behind Privy sign-in, backed by a private Neon Postgres table
 
 ## Local preview
 
@@ -42,16 +42,16 @@ npm run build   # production build
 
 ## Deployment
 
-1. Attach a private Neon Postgres database to the Vercel project and run
-   `db/001_waitlist.sql` once in its SQL editor.
+1. Attach a private Neon Postgres database to the Vercel project and run the `db/`
+   migrations once, in order, in its SQL editor.
 2. Set `DATABASE_URL`, `PRIVY_APP_ID` and `PRIVY_APP_SECRET` as **server-only** Vercel
    environment variables, and `VITE_PRIVY_APP_ID` to the same Privy app ID. Never commit
    secrets, and never prefix a server credential with `VITE_`.
 3. Enable email and Google login in Privy, and allow the local, preview and production
    origins.
-4. On the preview deployment, sign in with a test account, submit the form, and confirm one
-   row in `waitlist_entries`. Submit again to confirm the retry neither duplicates nor
-   overwrites it. Delete only that known test row afterwards.
+4. On the preview deployment, sign in with a test account and confirm one row in
+   `waitlist_entries`. Sign in again to confirm the retry neither duplicates nor overwrites
+   it. Delete only that known test row afterwards.
 
 Rolling back means rolling the frontend and API back together to the previous Vercel
 deployment. The `waitlist_entries` table is additive — leave it and its captured entries in
@@ -59,11 +59,14 @@ place.
 
 ## How the waitlist handles data
 
-The browser signs in with Privy before the form opens. The endpoint verifies the token's
-signature, issuer, audience, expiry and `did:privy:` subject, then reads the contact email
-**from Privy's API rather than from the submitted form**, so a forged email or ID in the
-request body is ignored. It stores the Privy ID, verified email, name, business, timestamp
-and consent version.
+Signing in *is* the signup — there is no form. The endpoint verifies the token's signature,
+issuer, audience, expiry and `did:privy:` subject, then reads the contact email **from
+Privy's API rather than from the request**, so a forged email or ID in the body is ignored.
+It stores the Privy ID, verified email, timestamp and consent version, and nothing else.
+
+Consent is shown in the Privy sign-in dialog before the visitor completes it. The `name` and
+`business` columns are retained but no longer written; `db/002_signup_only.sql` relaxes them
+rather than dropping them, so anything captured under the earlier form survives.
 
 The table has no public read endpoint and the browser never receives database credentials.
 Repeat submissions are idempotent by Privy ID. Any failure in configuration, identity lookup

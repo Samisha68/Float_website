@@ -18,10 +18,10 @@ export default createWaitlistHandler({
     return profile.linked_accounts.find(account => account.type === "email")?.address
       ?? profile.linked_accounts.find(account => account.type === "google_oauth")?.email;
   },
-  save: async ({ privyId, email, name, business }) => {
+  save: async ({ privyId, email }) => {
     const sql = neon(process.env.DATABASE_URL);
-    await sql`INSERT INTO waitlist_entries (privy_id, email, name, business, consent_version)
-      VALUES (${privyId}, ${email}, ${name}, ${business}, 'early-access-v1')
+    await sql`INSERT INTO waitlist_entries (privy_id, email, consent_version)
+      VALUES (${privyId}, ${email}, 'early-access-v1')
       ON CONFLICT (privy_id) DO NOTHING`;
   },
 });

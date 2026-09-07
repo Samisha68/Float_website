@@ -51,16 +51,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 1px solid 
 .dialog-content { position: relative; padding: 44px 32px 32px; }
 .close-button { position: absolute; right: 12px; top: 12px; display: grid; place-items: center; width: 40px; height: 40px; border: 0; background: transparent; color: #aaa; font-size: 26px; }
 .close-button:hover { color: #fff; }
-.eyebrow { text-transform: uppercase; letter-spacing: .15em; font-size: 11px; color: #a7a6a6; margin: 0 0 16px; }
 h2 { font-size: 30px; font-weight: 400; line-height: 1.15; letter-spacing: -.04em; margin: 0; }
 .dialog-sub { color: #a7a6a6; font-size: 14px; line-height: 1.6; margin: 14px 0 24px; overflow-wrap: anywhere; }
-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
-label { display: block; font-size: 13px; color: #ccc; margin: 20px 0 8px; }
-input { display: block; width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid #ffffff40; border-radius: 0; background: transparent; color: #fff; font-size: 16px; min-height: 48px; }
-input::placeholder { color: #747474; }
-.consent { font-size: 12px; color: #999; line-height: 1.6; margin: 22px 0 12px; }
-.form-submit { margin-top: 8px; }
-.form-error { font-size: 13px; color: #ffb5b5; line-height: 1.5; }
 .success-mark { font-size: 32px; margin-bottom: 24px; }
 @media (prefers-reduced-motion: no-preference) {
   .brand, .footer { animation: arrive 1.2s .15s both; }
