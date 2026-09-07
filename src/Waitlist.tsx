@@ -36,7 +36,7 @@ function Signup({ onClose }: { onClose: () => void }) {
       if (!token) throw new Error("Your session expired. Close this window and sign in again.");
       const response = await fetch("/api/waitlist", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: "{}", signal: request.signal });
       const result = await response.json().catch(() => null);
-      if (!response.ok || result?.ok !== true) throw new Error(response.status === 401 ? "Your session expired. Close this window and sign in again." : "We couldn’t save your place. Please try again in a moment.");
+      if (!response.ok || result?.ok !== true) throw new Error(response.status === 401 ? "Your session expired. Close this window and sign in again." : "Please try again in a moment.");
       setStatus("success");
     } catch (cause) {
       setStatus("error");
