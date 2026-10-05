@@ -1,0 +1,41 @@
+---
+title: API Reference (coming soon)
+subtitle: The full endpoint reference is on hold while the API settles
+slug: api-reference
+section: Concepts
+order: 7
+---
+
+<Warning>
+The API is still being finalized, so Float isn't publishing an endpoint-by-endpoint reference yet. Endpoints and fields may change before launch. Don't build a production dependency on them.
+</Warning>
+
+In the meantime, [Get started](/get-started) walks through the core flow with a test key, and the [Roadmap](/roadmap) says what is real today.
+
+## What to expect
+
+<CardGroup cols={2}>
+  <Card title="Scoped keys" icon="fa-solid fa-key">
+    Every request uses an API key that is either **test** or **live**. The two environments never share data. See [Environments and access](/overview#environments-and-access).
+  </Card>
+  <Card title="Idempotent requests" icon="fa-solid fa-rotate">
+    Creating things is safe to retry. Send an idempotency key and a repeated request returns the original result instead of creating a duplicate.
+  </Card>
+</CardGroup>
+
+## Two concepts that won't change shape
+
+Endpoints may move. These two ideas are the foundation of the product and are not expected to.
+
+<CardGroup cols={2}>
+  <Card title="Businesses" icon="fa-solid fa-store" href="/overview#the-partner-journey">
+    The business is the subject of everything Float does: underwriting, obligations and reputation all attach to one. Two partners who serve the same business can be linked through a wallet it controls.
+  </Card>
+  <Card title="Reputation" icon="fa-solid fa-shield-halved" href="/architecture#partner-reported-state-vs-float-verified-evidence">
+    Portable, consent-gated, and built only from evidence Float verifies itself. What a partner reports never counts toward it.
+  </Card>
+</CardGroup>
+
+## Want early access?
+
+Partner credentials are issued directly for now. See [Environments and access](/overview#environments-and-access).

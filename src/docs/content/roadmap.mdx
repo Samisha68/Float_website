@@ -1,0 +1,118 @@
+---
+title: Roadmap
+subtitle: What is built, what is still an interface, and what comes next
+section: Concepts
+order: 6
+---
+
+Use this page to decide what to integrate against now. Anything marked 🟡 is **not live**. Don't build a production dependency on it yet.
+
+<CardGroup cols={4}>
+  <Card title="Real Now">Live on the current API</Card>
+  <Card title="Next Steps">Agreed scope, not built</Card>
+  <Card title="Deferred">Waiting on a decision</Card>
+  <Card title="Later">If partners ask</Card>
+</CardGroup>
+
+## What your key gets today
+
+<Warning>
+Float is pre-launch. Live keys don't work for underwriting or KYB yet. See [Environments and access](/overview#environments-and-access).
+</Warning>
+
+| | Test keys (`fk_test_`) | Live keys (`fk_live_`) |
+|---|---|---|
+| **Underwriting** | Full sandbox behavior with mock results | `503`. No real provider is configured yet |
+| **KYB** | Full sandbox behavior with mock results | `503`. No real provider is configured yet |
+| **Chain observation** | Solana devnet | Not enabled |
+| **Document uploads** | `503`. No object storage is configured yet | `503`. No object storage is configured yet |
+| **Attestations** | Created, but stay **pending** (no anchor) | Created, but stay **pending** (no anchor) |
+
+## What is real vs stubbed
+
+| Area | 🟢 Real now | 🟡 Interface / not yet built |
+|---|---|---|
+| **Auth** | Partner API keys (HMAC-hashed, scoped, test/live, revocable), service keys | OAuth client credentials |
+| **HTTP conventions** | Envelope, error registry, request IDs, validation, idempotency, rate limit, security headers | Published [API Reference](/api-reference), on hold while the API is finalized |
+| **Businesses** | Create/link, masked identifiers (AES-GCM + blind index), ed25519 wallet proofs, wallet-based identity | KYB. Test keys use a sandbox; live keys return `503`, and businesses stay unverified |
+| **Underwriting** | Async lifecycle, dispatch with retries, SLA sweeper, information push, result ingestion, taxonomy validation | Real engine. Sandbox is test-only. Live keys return `503` until a real provider is connected |
+| **Assessments** | Stored, band resolved from versioned taxonomy, expiry flag | Final band taxonomy (`draft-1` is a placeholder) |
+| **Events & webhooks** | Outbox, `GET /v1/events`, signed webhooks (retries, auto-disable, secret rotation, SSRF guard with connect-time IP check) | Self-serve endpoint management (operator-managed for now) |
+| **Attestations** | Fingerprints, batching, proofs, private detail for the owning partner, and a public verification endpoint. See [Verifiable assessments](/architecture#verifiable-assessments) | **On-chain anchoring is not live.** Every attestation sits at pending with no anchor. Revocation isn't wired up yet |
+| **Documents** | Encrypted upload, forwarding, retention + deletion sweep | **Uploads return `503`: no object storage is configured yet.** Production retention policy is also undecided |
+| **Obligations & repayments** | Registration, reported accounting + status machine, overdue sweeper, repayment references, verification pipeline, `OutcomePolicy` (`chain_observed` v0), real Solana observer per environment | Discovery of unreported invoice repayments (only partner-supplied tx signatures are verified) |
+| **Credit lines** | `kind: credit_line`, Float-wide ceilings with per-provider shares, facilities, usage, live limit, settlements, chain observer for Subscriptions & Allowances delegations, `CreditOutcomePolicy` (`chain_observed_credit` v0) | Stream/webhook indexer for scale (polling today) |
+| **Reputation** | Consent-gated cross-partner read from Float-verified evidence only; `evidence_only` policy | Band policy (`band` is always `null`) |
+
+<Note>
+The chain observer is real but **off by default**, enabled per environment. Where it is off: repayments report `float_verification.status: "not_configured"`, obligations report `verified.chain_observability: "not_configured"`, and reputation returns `evidence_status: "chain_verification_not_configured"` with empty counts. Today it is on for test keys (Solana devnet) and not enabled for live keys.
+</Note>
+
+## Next increments
+
+Agreed scope, not built yet. Roughly in order.
+
+<CardGroup cols={2}>
+  <Card title="Attestation anchoring on Solana" icon="fa-solid fa-anchor">
+    Publish batch values on Solana, and revoke when an assessment is withdrawn.
+  </Card>
+  <Card title="Document object storage" icon="fa-solid fa-box-archive">
+    S3/GCS/R2 adapter, malware scanning, retention for information payloads and invoices.
+  </Card>
+  <Card title="Webhook delivery visibility" icon="fa-solid fa-satellite-dish">
+    Delivery logs in the dashboard and a manual redeliver command.
+  </Card>
+  <Card title="Invoice repayment discovery" icon="fa-solid fa-magnifying-glass-dollar">
+    Find unreported repayments via `repayment_reference` (source `chain_observed`).
+  </Card>
+  <Card title="Chain indexing at scale" icon="fa-solid fa-server">
+    Replace polling with a webhook/stream indexer (Helius / Geyser). Pick a mainnet RPC provider.
+  </Card>
+  <Card title="Failed-pull decoding" icon="fa-solid fa-bug">
+    Confirm against a real failed CPI pull (none in the mainnet sample yet).
+  </Card>
+  <Card title="Credit outcome policy v1" icon="fa-solid fa-sliders">
+    Grace window, revocation with outstanding usage, scaling by amounts.
+  </Card>
+  <Card title="Usage-history schema" icon="fa-solid fa-table-list">
+    Replace the open `0.1` schema with fields agreed with the underwriting developer.
+  </Card>
+  <Card title="Reputation band policy" icon="fa-solid fa-ranking-star">
+    Decide bands and which cross-partner evidence to expose.
+  </Card>
+  <Card title="Obligation edge states" icon="fa-solid fa-code-branch">
+    Recovered after default, disputes, restructuring.
+  </Card>
+  <Card title="Published API reference" icon="fa-solid fa-file-code" href="/api-reference">
+    Generated from the API itself, once the API is finalized.
+  </Card>
+</CardGroup>
+
+## Deferred by decision
+
+| Item | Status today |
+|---|---|
+| Double-financing detection | Invoice fingerprint is written; detection logic later |
+| Production document retention | Legal/compliance decision; policy is configurable once decided |
+| Real information schema | Open schema `0.1` until the field set is agreed |
+| Real band taxonomy | `invoice_risk/draft-1` is a placeholder |
+| KYB | `identity_status` stays `unverified` until an identity provider is integrated |
+
+## Later
+
+<AccordionGroup>
+  <Accordion title="API surface">
+    - `POST /v1/underwriting_requests/{id}/cancel` (the `canceled` state already exists)
+    - List endpoints for underwriting requests and obligations, if partners ask (`GET /v1/events` covers reconciliation today)
+    - `PATCH /v1/businesses/{id}`
+  </Accordion>
+  <Accordion title="Self-serve & auth">
+    - Self-serve API keys and webhooks (with the dashboard)
+    - OAuth client credentials
+    - Wallet-signed consent grants instead of partner-attested consent
+  </Accordion>
+  <Accordion title="Operations">
+    - Metrics export and alert routing
+    - A worker health endpoint
+  </Accordion>
+</AccordionGroup>

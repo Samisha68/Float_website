@@ -83,3 +83,18 @@ or persistence returns an error — a completed login alone never counts as a sa
 Logs carry a request ID and an event code only, never contact data or tokens. Watch
 `waitlist.save_failed` and `waitlist.auth_unavailable` in Vercel logs; if signup breaks,
 check the environment variables and that the migration has run.
+
+## Docs (`/docs`)
+
+The product docs live in this repo as MDX and are served at `/docs`. They are a separate entry
+(`docs.html` → `src/docs/`) so their styles can't touch the landing page.
+
+- **Add a page:** create `src/docs/content/<path>.mdx` with frontmatter
+  `title`, `subtitle`, `section` (sidebar group) and `order` (position). The file path is the URL:
+  `content/guides/kyb.mdx` → `/docs/guides/kyb`. `get-started` is served at `/docs` itself.
+  Internal links are written site-relative (`/overview#environments-and-access`) and mapped to `/docs/...`.
+- **Components:** `Note`, `Warning`, `Tip`, `Info`, `Card`, `CardGroup`, `Tabs`/`Tab`, `Steps`/`Step`,
+  `Accordion`/`AccordionGroup`, `CodeBlocks` and ```` ```mermaid ```` are in `src/docs/components.tsx`.
+  Card icons use Font Awesome names; register new ones in `src/docs/icons.tsx`.
+- **Build:** `npm run build` also prerenders every docs page to `dist/docs/**/index.html` and writes
+  `sitemap.xml` and `robots.txt` (`scripts/prerender.mjs`). `npm run dev` serves `/docs` on the client.
