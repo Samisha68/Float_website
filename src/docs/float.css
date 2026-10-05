@@ -1,0 +1,484 @@
+/* Float docs theme, imported from the Fern site's float.css.
+   Everything is nested under .docs-root so none of it can reach the landing page.
+   Changes from the original: `:root` -> the wrapper itself, `.dark` -> `html.dark` (the theme
+   class lives on <html> so it can be set before first paint), `body` -> the wrapper, and
+   `*` -> descendants of the wrapper. Rules are otherwise unchanged. */
+
+.docs-root {
+  --float-gradient: linear-gradient(120deg, #171717, #9a9a9a);
+  --float-surface: #ffffff;
+  --float-surface-2: #f1f1f1;
+  --float-line: #dcdcdc;
+  --float-line-strong: #b5b5b5;
+  --float-text: #171717;
+  --float-muted: #6b6b6b;
+  --float-grid-line: rgba(0, 0, 0, 0.05);
+  --float-shadow: 4px 4px 0 0 rgba(0, 0, 0, 0.12);
+  --float-shadow-sm: 2px 2px 0 0 rgba(0, 0, 0, 0.1);
+  --float-on-accent: #ffffff;
+
+  html.dark & {
+    --float-gradient: linear-gradient(120deg, #ededed, #6a6a6a);
+    --float-surface: #191919;
+    --float-surface-2: #1f1f1f;
+    --float-line: #2a2a2a;
+    --float-line-strong: #3d3d3d;
+    --float-text: #ededed;
+    --float-muted: #8a8a8a;
+    --float-grid-line: rgba(255, 255, 255, 0.04);
+    --float-shadow: 4px 4px 0 0 rgba(0, 0, 0, 0.5);
+    --float-shadow-sm: 2px 2px 0 0 rgba(0, 0, 0, 0.45);
+    --float-on-accent: #121212;
+  }
+
+  /* ── Global: sharp corners, flat black & white ─────────────────────────── */
+
+  &,
+  & *,
+  & *::before,
+  & *::after {
+    border-radius: 0 !important;
+  }
+
+  /* ── Type ──────────────────────────────────────────────────────────────── */
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.025em;
+  }
+
+  h1 {
+    font-weight: 600;
+  }
+
+  & {
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  code {
+    font-feature-settings: "liga" 0;
+  }
+
+  .float-gradient-text {
+    background: var(--float-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .float-eyebrow {
+    display: inline-block;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--float-muted);
+  }
+
+  /* ── Hero (Get started) ────────────────────────────────────────────────── */
+
+  .float-hero {
+    position: relative;
+    margin: 0 0 2.5rem;
+    padding: 2.75rem 2.25rem 2.25rem;
+    border: 1px solid var(--float-line);
+    border-radius: 0;
+    box-shadow: var(--float-shadow);
+    background: var(--float-surface);
+  }
+
+  .float-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--float-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--float-grid-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+
+  .float-hero > * {
+    position: relative;
+  }
+
+  .float-hero h2 {
+    margin: 0.75rem 0 0.75rem;
+    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    line-height: 1.08;
+    font-weight: 600;
+    border: 0;
+  }
+
+  .float-hero p {
+    max-width: 34rem;
+    margin: 0;
+    color: var(--float-muted);
+    font-size: 1.05rem;
+  }
+
+  .float-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .float-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
+    border-radius: 0;
+    border: 1px solid var(--float-line);
+    box-shadow: var(--float-shadow-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none !important;
+    color: var(--float-text) !important;
+    background: var(--float-surface);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+
+  .float-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 0 var(--float-line);
+  }
+
+  .float-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+  }
+
+  .float-btn--primary {
+    color: var(--float-on-accent) !important;
+    background: var(--float-text);
+  }
+
+  /* ── Pills & stats ─────────────────────────────────────────────────────── */
+
+  .float-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid var(--float-line);
+    border-radius: 0;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--float-muted);
+    background: var(--float-surface);
+  }
+
+  .float-pill::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 0;
+    background: var(--float-text);
+  }
+
+  .float-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0 2rem;
+  }
+
+  .float-stat {
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--float-line);
+    border-radius: 0;
+    box-shadow: var(--float-shadow-sm);
+    background: var(--float-surface);
+  }
+
+  .float-stat strong {
+    display: block;
+    font-family: "Inter", sans-serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  .float-stat span {
+    font-size: 0.82rem;
+    color: var(--float-muted);
+  }
+
+  /* ── Footer ────────────────────────────────────────────────────────────── */
+
+  .float-footer {
+    position: relative;
+    margin-top: 4rem;
+    border-top: 1px solid var(--float-line);
+    color: var(--float-text);
+    background-color: var(--float-surface);
+    background-image:
+      linear-gradient(var(--float-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--float-grid-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .float-footer__glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--float-line-strong);
+  }
+
+  .float-footer__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
+    gap: 3rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 2rem;
+  }
+
+  .float-footer__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--float-text) !important;
+    text-decoration: none !important;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+  }
+
+  .float-footer__tagline {
+    max-width: 22rem;
+    margin: 1rem 0 1.25rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--float-muted);
+  }
+
+  .float-footer__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--float-line);
+    border-radius: 0;
+    box-shadow: var(--float-shadow-sm);
+    background: var(--float-surface);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--float-muted);
+  }
+
+  .float-footer__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 0;
+    background: var(--float-text);
+  }
+
+  .float-footer__cols {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+  }
+
+  .float-footer__col h4 {
+    margin: 0 0 0.9rem;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--float-muted);
+  }
+
+  .float-footer__col ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .float-footer__col li {
+    margin: 0 0 0.55rem;
+  }
+
+  .float-footer__col a {
+    font-size: 0.9rem;
+    color: var(--float-text) !important;
+    text-decoration: none !important;
+    opacity: 0.85;
+    transition: opacity 0.15s ease;
+  }
+
+  .float-footer__col a:hover {
+    opacity: 1;
+    text-decoration: underline !important;
+    text-underline-offset: 3px;
+  }
+
+  .float-footer__bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1.25rem 1.5rem 2rem;
+    border-top: 1px solid var(--float-line);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--float-muted);
+  }
+
+  @media (max-width: 768px) {
+    .float-hero {
+      padding: 2rem 1.25rem 1.5rem;
+    }
+
+    .float-footer__inner {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .float-footer__cols {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* ── Mermaid diagrams ────────────────────────────────────────────────────
+     Restyles the rendered SVG with the same tokens as the rest of the site. Keyed on
+     aria-roledescription, which mermaid sets on every diagram, and !important to beat its
+     scoped inline <style>. */
+
+  svg[aria-roledescription] {
+    max-width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--float-line);
+    box-shadow: var(--float-shadow);
+    background-color: var(--float-surface) !important;
+    background-image:
+      linear-gradient(var(--float-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--float-grid-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    font-family: "Inter", sans-serif !important;
+  }
+
+  svg[aria-roledescription] rect,
+  svg[aria-roledescription] polygon,
+  svg[aria-roledescription] path.basic,
+  svg[aria-roledescription] circle {
+    rx: 0;
+    ry: 0;
+  }
+
+  /* Flowchart: nodes */
+  svg[aria-roledescription] .node rect,
+  svg[aria-roledescription] .node polygon,
+  svg[aria-roledescription] .node circle,
+  svg[aria-roledescription] .node ellipse,
+  svg[aria-roledescription] .node path {
+    fill: var(--float-surface) !important;
+    stroke: var(--float-line-strong) !important;
+    stroke-width: 1px !important;
+  }
+
+  /* Flowchart: subgraphs */
+  svg[aria-roledescription] .cluster rect {
+    fill: var(--float-surface-2) !important;
+    stroke: var(--float-line-strong) !important;
+    stroke-dasharray: 4 3;
+    stroke-width: 1px !important;
+  }
+
+  /* Flowchart: edges */
+  svg[aria-roledescription] .edgePath path,
+  svg[aria-roledescription] .flowchart-link {
+    stroke: var(--float-muted) !important;
+    stroke-width: 1px !important;
+  }
+
+  svg[aria-roledescription] marker path,
+  svg[aria-roledescription] .arrowheadPath,
+  svg[aria-roledescription] .marker {
+    fill: var(--float-muted) !important;
+    stroke: var(--float-muted) !important;
+  }
+
+  svg[aria-roledescription] .edgeLabel,
+  svg[aria-roledescription] .edgeLabel rect,
+  svg[aria-roledescription] .labelBkg {
+    background-color: var(--float-surface) !important;
+    fill: var(--float-surface) !important;
+    opacity: 1;
+  }
+
+  svg[aria-roledescription] .edgeLabel span,
+  svg[aria-roledescription] .edgeLabel p {
+    background-color: var(--float-surface) !important;
+    color: var(--float-muted) !important;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.85em;
+  }
+
+  /* Text everywhere */
+  svg[aria-roledescription] .nodeLabel,
+  svg[aria-roledescription] .nodeLabel p,
+  svg[aria-roledescription] .label,
+  svg[aria-roledescription] .cluster-label,
+  svg[aria-roledescription] .cluster-label span,
+  svg[aria-roledescription] .cluster-label p {
+    color: var(--float-text) !important;
+  }
+
+  svg[aria-roledescription] text,
+  svg[aria-roledescription] tspan {
+    fill: var(--float-text) !important;
+    font-family: "Inter", sans-serif !important;
+  }
+
+  /* Sequence: participants, lifelines, messages, notes */
+  svg[aria-roledescription] rect.actor {
+    fill: var(--float-surface) !important;
+    stroke: var(--float-line-strong) !important;
+  }
+
+  svg[aria-roledescription] .actor-line {
+    stroke: var(--float-line-strong) !important;
+    stroke-dasharray: 3 3;
+  }
+
+  svg[aria-roledescription] .messageLine0,
+  svg[aria-roledescription] .messageLine1 {
+    stroke: var(--float-text) !important;
+    stroke-width: 1px !important;
+  }
+
+  svg[aria-roledescription] .messageText,
+  svg[aria-roledescription] .messageText tspan {
+    font-family: "JetBrains Mono", ui-monospace, monospace !important;
+    font-size: 12px !important;
+  }
+
+  svg[aria-roledescription] .sequenceNumber {
+    fill: var(--float-on-accent) !important;
+  }
+
+  svg[aria-roledescription] #sequencenumber,
+  svg[aria-roledescription] marker#sequencenumber circle {
+    fill: var(--float-text) !important;
+  }
+
+  svg[aria-roledescription] rect.note {
+    fill: var(--float-surface-2) !important;
+    stroke: var(--float-line-strong) !important;
+  }
+
+  svg[aria-roledescription] .noteText,
+  svg[aria-roledescription] .noteText tspan {
+    fill: var(--float-muted) !important;
+  }
+}

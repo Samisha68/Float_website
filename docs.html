@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Float Docs</title>
+    <meta name="description" content="Documentation for Float, credit infrastructure for service providers on Solana." />
+    <meta property="og:title" content="Float Docs" />
+    <meta property="og:description" content="Documentation for Float, credit infrastructure for service providers on Solana." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/float-favicon.svg?v=2" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>body { margin: 0; }</style>
+    <script>
+      // Dark is the default; only an explicit light choice overrides it. Set before first paint to avoid a flash.
+      try {
+        var t = localStorage.getItem("float-docs-theme");
+        if (t !== "light") document.documentElement.classList.add("dark");
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/docs/main.tsx"></script>
+  </body>
+</html>

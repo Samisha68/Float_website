@@ -1,6 +1,14 @@
 import { defineConfig, loadEnv, type ViteDevServer } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import mdx from "@mdx-js/rollup";
+import remarkGfm from "remark-gfm";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkMdxFrontmatter from "remark-mdx-frontmatter";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypeShiki from "@shikijs/rehype";
+import { remarkToc, remarkUnwrapJsxParagraphs, shikiFenceInfo } from "./scripts/mdx-plugins";
 
 // Serves /api/waitlist during `npm run dev` using the same handler Vercel runs in
 // production, so the signup can be exercised locally without the Vercel runtime.
@@ -30,6 +38,45 @@ function waitlistDevApi() {
   };
 }
 
+// In production the docs are prerendered to dist/docs/**/index.html. In dev there is no such
+// file, so hand every /docs URL to the docs entry page, which renders the route on the client.
+function docsDevRoutes() {
+  return {
+    name: "docs-dev-routes",
+    apply: "serve" as const,
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use((req, _res, next) => {
+        if (req.url && /^\/docs(?:[/?#]|$)/.test(req.url)) req.url = "/docs.html";
+        next();
+      });
+    },
+  };
+}
+
+const docsMdx = {
+  enforce: "pre" as const,
+  ...mdx({
+    remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkGfm, remarkUnwrapJsxParagraphs, remarkToc],
+    rehypePlugins: [
+      rehypeSlug,
+      [rehypeAutolinkHeadings, {
+        behavior: "append",
+        properties: { className: ["heading-anchor"], ariaLabel: "Link to this section" },
+        content: { type: "text", value: "#" },
+      }],
+      [rehypeShiki, {
+        themes: { light: "github-light", dark: "github-dark" },
+        defaultColor: false,
+        fallbackLanguage: "text",
+        transformers: [shikiFenceInfo],
+      }],
+    ],
+  }),
+};
+
 export default defineConfig({
-  plugins: [react(), tailwindcss(), waitlistDevApi()],
+  plugins: [docsMdx, react({ include: /\.(mdx|js|jsx|ts|tsx)$/ }), tailwindcss(), waitlistDevApi(), docsDevRoutes()],
+  build: {
+    rollupOptions: { input: { main: "index.html", docs: "docs.html" } },
+  },
 });

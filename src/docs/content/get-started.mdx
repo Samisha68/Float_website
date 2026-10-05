@@ -1,0 +1,211 @@
+---
+title: Get started
+subtitle: From a test key to your first Float assessment in four calls
+section: Start here
+order: 1
+---
+
+<div className="float-hero">
+  <h2>Credit infrastructure that <span className="float-gradient-text">proves itself</span>.</h2>
+  <p>
+    Float underwrites receivables, records the obligations you finance, and turns on-chain
+    repayments into portable business reputation. You keep the capital and every decision.
+  </p>
+  <div className="float-hero__actions">
+    <a className="float-btn float-btn--primary" href="#quickstart">Run the quickstart →</a>
+    <a className="float-btn" href="/overview">How Float works</a>
+    <a className="float-btn" href="/overview#environments-and-access">Environments and access</a>
+  </div>
+</div>
+
+## What Float gives you
+
+<CardGroup cols={3}>
+  <Card title="Underwriting" icon="fa-solid fa-file-invoice-dollar" href="/overview#the-partner-journey">
+    Submit an invoice or credit line, get back a risk band, confidence and reason codes.
+  </Card>
+  <Card title="Obligations" icon="fa-solid fa-link" href="/overview#partner-reported-vs-float-verified">
+    Register what you financed. Float binds on-chain repayments to it.
+  </Card>
+  <Card title="Reputation" icon="fa-solid fa-shield-halved" href="/architecture#partner-reported-state-vs-float-verified-evidence">
+    Portable, consent-gated, built only from evidence Float verifies.
+  </Card>
+</CardGroup>
+
+<Warning>
+Float is **not** a lender, pool, custodian or payment processor. It never holds or moves funds.
+</Warning>
+
+## Explore by product
+
+<Tabs>
+  <Tab title="Invoice financing">
+    The default flow (`kind: invoice`). You submit a receivable, Float returns an assessment, you decide and finance.
+
+    | Step | Call | You get |
+    |---|---|---|
+    | 1 | `POST /v1/businesses` | `biz_…`, created or linked |
+    | 2 | `POST /v1/underwriting_requests` | `uwr_…` with status `pending` |
+    | 3 | `GET /v1/underwriting_requests/{id}` | An assessment once `completed` |
+    | 4 | `POST /v1/obligations` | `obl_…` plus a `repayment_reference` |
+
+    <Tip>There is no approve/decline field and no price in an assessment. That decision is yours.</Tip>
+  </Tab>
+  <Tab title="Credit lines">
+    API/RPC credit lines use `kind: credit_line` on the **same** underwriting and reputation engine.
+
+    | Shared with invoices | Specific to credit lines |
+    |---|---|
+    | Businesses and consent | Float-wide ceilings with fixed per-provider shares |
+    | Underwriting lifecycle | Credit facilities, usage, live limit, settlements |
+    | Events and webhooks | Solana Subscriptions & Allowances delegations |
+    | Reputation engine | `chain_observed_credit` outcome policy |
+
+    <Note>The credit-line flow is still a proof of concept. See [Proof of concept](/proof-of-concept).</Note>
+  </Tab>
+  <Tab title="Reputation">
+    Reputation is a **read** over Float-verified outcomes. It never includes amounts, partners or invoices.
+
+    <CardGroup cols={2}>
+      <Card title="Consent first" icon="fa-solid fa-user-check">
+        Record it with `PUT /v1/businesses/{id}/consent`. Without it, reads return `403`.
+      </Card>
+      <Card title="Verified only" icon="fa-solid fa-circle-check">
+        Partner reports never count. Only chain observations Float makes itself.
+      </Card>
+    </CardGroup>
+  </Tab>
+</Tabs>
+
+## Quickstart
+
+<Steps>
+  <Step title="Grab a test key">
+    Test keys start with `fk_test_` and only ever touch test data. There is no self-serve signup yet, so see [Environments and access](/overview#environments-and-access) for how to get one.
+
+    ```bash
+    export FLOAT_API_KEY=fk_test_…
+    ```
+  </Step>
+  <Step title="Create a business">
+    <CodeBlocks>
+    ```bash cURL
+    curl -X POST https://api.float.xyz/v1/businesses \
+      -H "Authorization: Bearer $FLOAT_API_KEY" \
+      -H "Content-Type: application/json" \
+      -H "Idempotency-Key: $(uuidgen)" \
+      -d '{"external_id":"acct_8842","display_name":"Lagos Freight Ltd","country":"NG"}'
+    ```
+
+    ```typescript TypeScript
+    const res = await fetch("https://api.float.xyz/v1/businesses", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.FLOAT_API_KEY}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": crypto.randomUUID(),
+      },
+      body: JSON.stringify({ external_id: "acct_8842", display_name: "Lagos Freight Ltd", country: "NG" }),
+    });
+    const { data: business } = await res.json(); // business.id → "biz_01J…"
+    ```
+
+    ```python Python
+    import os, uuid, requests
+
+    res = requests.post(
+        "https://api.float.xyz/v1/businesses",
+        headers={
+            "Authorization": f"Bearer {os.environ['FLOAT_API_KEY']}",
+            "Idempotency-Key": str(uuid.uuid4()),
+        },
+        json={"external_id": "acct_8842", "display_name": "Lagos Freight Ltd", "country": "NG"},
+    )
+    business = res.json()["data"]  # business["id"] → "biz_01J…"
+    ```
+    </CodeBlocks>
+  </Step>
+  <Step title="Submit an invoice">
+    Underwriting is asynchronous: you get `202` and status `pending`.
+
+    ```bash
+    curl -X POST https://api.float.xyz/v1/underwriting_requests \
+      -H "Authorization: Bearer $FLOAT_API_KEY" \
+      -H "Content-Type: application/json" \
+      -H "Idempotency-Key: $(uuidgen)" \
+      -d '{
+        "business": "biz_01J…",
+        "invoice": {
+          "invoice_number": "INV-2026-0091",
+          "amount": { "amount": "4500000", "currency": "USD" },
+          "issue_date": "2026-09-01",
+          "due_date": "2026-11-30",
+          "debtor": { "name": "Acme Retail Plc", "country": "NG" }
+        }
+      }'
+    ```
+  </Step>
+  <Step title="Read the assessment">
+    Poll the request, or follow `GET /v1/events`. A completed request embeds the assessment.
+
+    ```json
+    "assessment": {
+      "band": { "key": "moderate_risk", "label": "Moderate risk", "ordinal": 2, "of": 3 },
+      "confidence": { "level": "medium" },
+      "verification": { "invoice": "verified", "debtor": "partially_verified", "business": "unverified" },
+      "reasons": [{ "code": "DEBTOR_PAYMENT_HISTORY_LIMITED", "direction": "negative" }]
+    }
+    ```
+  </Step>
+</Steps>
+
+## Sandbox
+
+With a `fk_test_` key, an invoice-number suffix picks the outcome. Try `INV-0091-SBX-REJECT`.
+
+| Suffix | Outcome |
+|---|---|
+| *(none)* | `completed`, band `moderate_risk` |
+| `-SBX-BAND-<key>` | `completed` with that band (`low_risk`, `high_risk`, …) |
+| `-SBX-REJECT` | `rejected` |
+| `-SBX-INFO` | `requires_information`; any information push completes it |
+| `-SBX-FAIL` | `failed` |
+| `-SBX-SILENT` | stays `processing` until the SLA timeout |
+| `-SBX-UNAVAILABLE` | retried, then `failed` / `underwriting_dispatch_failed` |
+
+<Info>Sandbox assessments carry `engine.name: "float-sandbox"` and a `SANDBOX_RESULT` reason. They are not real assessments.</Info>
+
+## Explore by role
+
+<Tabs>
+  <Tab title="Platform engineer">
+    <CardGroup cols={2}>
+      <Card title="Integration at a glance" icon="fa-solid fa-plug" href="/overview#integration-at-a-glance">
+        Auth, idempotency, money and IDs.
+      </Card>
+      <Card title="API Reference (coming soon)" icon="fa-solid fa-code" href="/api-reference">
+        The full endpoint reference, once the API is finalized.
+      </Card>
+    </CardGroup>
+  </Tab>
+  <Tab title="Risk & ops">
+    <CardGroup cols={2}>
+      <Card title="Reported vs verified" icon="fa-solid fa-scale-balanced" href="/architecture#partner-reported-state-vs-float-verified-evidence">
+        What counts toward reputation, and what never does.
+      </Card>
+      <Card title="What's live" icon="fa-solid fa-signal" href="/roadmap">
+        Real today vs still an interface.
+      </Card>
+    </CardGroup>
+  </Tab>
+  <Tab title="Architect">
+    <CardGroup cols={2}>
+      <Card title="Architecture" icon="fa-solid fa-diagram-project" href="/architecture">
+        The principles Float is built on, and verifiable assessments.
+      </Card>
+      <Card title="Decision log" icon="fa-solid fa-book" href="/decision-log">
+        The decisions that shape the design.
+      </Card>
+    </CardGroup>
+  </Tab>
+</Tabs>
