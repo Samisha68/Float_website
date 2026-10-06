@@ -128,7 +128,7 @@ export default function App() {
       </div>
       <footer className="footer">© {new Date().getFullYear()} Float</footer>
 
-      <section className="join" ref={join} aria-labelledby="join-title">
+      <section className="bg-black join" ref={join} aria-labelledby="join-title">
         <div className="join-card">
           <h2 id="join-title">Tell us a little.</h2>
           <p className="join-sub">Three questions, then you’re on the list.</p>

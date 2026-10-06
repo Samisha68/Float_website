@@ -1,17 +1,19 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type RefObject } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 
 const GITHUB_URL = "https://github.com/Samisha68/Float-Finance";
 const X_URL = "https://x.com/float_fi";
-// TODO: confirm where "Get Started" should point. /docs is the interim target.
-const GET_STARTED_URL = "/docs";
+// TODO: /providers has no page yet; build it (and add it to vite.config.ts + vercel.json) before launch.
+const getStarted: NavLink[] = [
+  { label: "For businesses", href: "/onboard" },
+  { label: "For providers", href: "/providers" },
+];
 
 type NavLink = { label: string; href: string; external?: boolean };
 
 const links: NavLink[] = [
   { label: "How it works", href: "#how-it-works" },
   { label: "Providers", href: "#providers" },
-  { label: "Docs", href: "/docs" },
   { label: "Onboard", href: "/onboard" },
 ];
 
@@ -31,24 +33,29 @@ export default function Navbar() {
   const resourcesButton = useRef<HTMLButtonElement>(null);
   const resourcesPanel = useRef<HTMLDivElement>(null);
   const [resourcesOpen, setResourcesOpen] = useState(false);
+  const getStartedButton = useRef<HTMLButtonElement>(null);
+  const getStartedPanel = useRef<HTMLDivElement>(null);
+  const [getStartedOpen, setGetStartedOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Outside click and Escape close whichever menu is open.
   useEffect(() => {
-    if (!resourcesOpen && !mobileOpen) return;
+    if (!resourcesOpen && !getStartedOpen && !mobileOpen) return;
     const onPointerDown = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) { setResourcesOpen(false); setMobileOpen(false); }
+      if (!root.current?.contains(event.target as Node)) { setResourcesOpen(false); setGetStartedOpen(false); setMobileOpen(false); }
     };
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== "Escape") return;
       if (resourcesOpen) resourcesButton.current?.focus();
+      else if (getStartedOpen) getStartedButton.current?.focus();
       setResourcesOpen(false);
+      setGetStartedOpen(false);
       setMobileOpen(false);
     };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
     return () => { document.removeEventListener("pointerdown", onPointerDown); document.removeEventListener("keydown", onKeyDown); };
-  }, [resourcesOpen, mobileOpen]);
+  }, [resourcesOpen, getStartedOpen, mobileOpen]);
 
   // On pages other than home, section anchors point back to the home page's sections.
   const resolve = (href: string) => (href.startsWith("#") && typeof location !== "undefined" && location.pathname !== "/" ? `/${href}` : href);
@@ -57,6 +64,7 @@ export default function Navbar() {
   // otherwise the browser's default hash behaviour applies.
   function follow(event: MouseEvent<HTMLAnchorElement>, href: string) {
     setResourcesOpen(false);
+    setGetStartedOpen(false);
     setMobileOpen(false);
     if (!href.startsWith("#")) return;
     const target = document.getElementById(href.slice(1));
@@ -66,10 +74,10 @@ export default function Navbar() {
     history.replaceState(null, "", href);
   }
 
-  const menuItems = () => Array.from(resourcesPanel.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+  const menuItems = (panel: RefObject<HTMLDivElement | null> = resourcesPanel) => Array.from(panel.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
 
-  function onMenuKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const items = menuItems();
+  function onMenuKeyDown(event: KeyboardEvent<HTMLDivElement>, panel: RefObject<HTMLDivElement | null> = resourcesPanel) {
+    const items = menuItems(panel);
     const index = items.indexOf(document.activeElement as HTMLElement);
     const next = event.key === "ArrowDown" ? (index + 1) % items.length
       : event.key === "ArrowUp" ? (index - 1 + items.length) % items.length
@@ -86,6 +94,13 @@ export default function Navbar() {
     event.preventDefault();
     setResourcesOpen(true);
     requestAnimationFrame(() => menuItems()[0]?.focus());
+  }
+
+  function onGetStartedKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key !== "ArrowDown") return;
+    event.preventDefault();
+    setGetStartedOpen(true);
+    requestAnimationFrame(() => menuItems(getStartedPanel)[0]?.focus());
   }
 
   return (
@@ -108,7 +123,7 @@ export default function Navbar() {
                 aria-expanded={resourcesOpen}
                 aria-haspopup="true"
                 aria-controls="resources-menu"
-                onClick={() => setResourcesOpen((open) => !open)}
+                onClick={() => { setResourcesOpen((open) => !open); setGetStartedOpen(false); }}
                 onKeyDown={onResourcesKeyDown}
               >
                 Resources
@@ -131,7 +146,35 @@ export default function Navbar() {
             </div>
           </div>
 
-          <a href={GET_STARTED_URL} className={`hidden md:inline-block ${ctaClass}`} onClick={(event) => follow(event, GET_STARTED_URL)}>Get Started</a>
+          <div className="relative hidden md:block">
+            <button
+              ref={getStartedButton}
+              type="button"
+              className={`flex items-center gap-1 ${ctaClass}`}
+              aria-expanded={getStartedOpen}
+              aria-haspopup="true"
+              aria-controls="get-started-menu"
+              onClick={() => { setGetStartedOpen((open) => !open); setResourcesOpen(false); }}
+              onKeyDown={onGetStartedKeyDown}
+            >
+              Get Started
+              <ChevronDown className={`h-3 w-3 transition-transform ${getStartedOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+            </button>
+            {getStartedOpen && (
+              <div
+                id="get-started-menu"
+                ref={getStartedPanel}
+                role="menu"
+                aria-label="Get started"
+                className="absolute top-full right-0 mt-3 w-44 bg-black/90 backdrop-blur-xl border border-neutral-600 p-1.5 shadow-2xl z-50"
+                onKeyDown={(event) => onMenuKeyDown(event, getStartedPanel)}
+              >
+                {getStarted.map((link) => (
+                  <a key={link.label} role="menuitem" href={link.href} className={itemClass} onClick={(event) => follow(event, link.href)}>{link.label}</a>
+                ))}
+              </div>
+            )}
+          </div>
 
           <button
             type="button"
@@ -154,7 +197,10 @@ export default function Navbar() {
             {resources.map((link) => (
               <a key={link.label} href={link.href} className={itemClass} {...externalProps(link)} onClick={(event) => follow(event, link.href)}>{link.label}</a>
             ))}
-            <a href={GET_STARTED_URL} className={`block text-center mt-2 ${ctaClass}`} onClick={(event) => follow(event, GET_STARTED_URL)}>Get Started</a>
+            <p className="px-3 pt-3 pb-1 text-[0.6875rem] font-medium uppercase tracking-wider text-white/40">Get started</p>
+            {getStarted.map((link) => (
+              <a key={link.label} href={link.href} className={itemClass} onClick={(event) => follow(event, link.href)}>{link.label}</a>
+            ))}
           </div>
         )}
       </div>

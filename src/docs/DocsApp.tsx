@@ -28,10 +28,8 @@ function Header({ menuOpen, onMenu }: { menuOpen: boolean; onMenu: () => void })
         <button type="button" className="docs-menu" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="docs-sidebar" onClick={onMenu}>
           {menuOpen ? <FaXmark aria-hidden /> : <FaBars aria-hidden />}
         </button>
-        <DocLink href="/docs" className="docs-logo" aria-label="Float docs home"><Logo height={28} /></DocLink>
+        <DocLink href="\" className="docs-logo" aria-label="Float docs home"><Logo height={28} /></DocLink>
         <nav className="docs-nav" aria-label="Site">
-          <DocLink href="/docs/roadmap" className="docs-nav__link">Roadmap</DocLink>
-          <a className="docs-nav__icon" href={GITHUB_URL} target="_blank" rel="noopener noreferrer" aria-label="Float on GitHub"><FaGithub aria-hidden /></a>
           <button type="button" className="docs-nav__icon" onClick={toggleTheme} aria-label="Toggle light and dark theme">
             <FaMoon className="icon-moon" aria-hidden /><FaSun className="icon-sun" aria-hidden />
           </button>
