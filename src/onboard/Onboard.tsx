@@ -1,42 +1,28 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Plus, Trash2 } from "lucide-react";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
-import { Checkbox, FileField, Heading, Select, Text, TextArea } from "./fields";
+import { Checkbox, FileField, Select, Text, TextArea } from "./fields";
 import {
-  type Address, type Docs, type Errors, type Form, type Person,
-  countries, emptyPerson, ENTITY_TYPES, ID_TYPES, INDUSTRIES, initialForm, MAX_PEOPLE, ROLES, SPEND, STEPS, validate,
+  type CountryOption, type Docs, type Errors, type Form, type Person,
+  emptyPerson, ENTITY_TYPES, fallbackCountries, fetchCountries, ID_TYPES, INDUSTRIES, initialForm, MAX_PEOPLE, ROLES, RPC_PROVIDERS, RPC_USAGE, STEPS, validate,
 } from "./model";
 
 const TITLES = ["Company details", "Owners & directors", "Documents", "Activity", "Review & declare"];
 const SUBTITLES = [
   "Tell us about your registered business.",
   "List everyone with 25% or more ownership, plus directors and authorized signers.",
-  "Upload PDF, PNG or JPG files.",
+  "Upload PDF, PNG or JPG files. Everything here is optional, but we can only proceed once we have all documents.",
   "How you plan to use your credit line.",
   "Confirm everything is accurate before you submit.",
 ];
 
-function AddressFields({ value, onChange, prefix, errors }: { value: Address; onChange: (a: Address) => void; prefix: string; errors: Errors }) {
-  const set = (k: keyof Address) => (v: string) => onChange({ ...value, [k]: v });
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-      <Text className="col-span-2" label="Address line 1" value={value.line1} onChange={set("line1")} error={errors[`${prefix}.line1`]} autoComplete="off" />
-      <Text className="col-span-2" label="Address line 2" value={value.line2} onChange={set("line2")} optional autoComplete="off" />
-      <Select label="Country" value={value.country} onChange={set("country")} options={countries} error={errors[`${prefix}.country`]} />
-      <Text label="City" value={value.city} onChange={set("city")} error={errors[`${prefix}.city`]} autoComplete="off" />
-      <Text label="State / region" value={value.state} onChange={set("state")} error={errors[`${prefix}.state`]} autoComplete="off" />
-      <Text label="Postal code" value={value.postal} onChange={set("postal")} error={errors[`${prefix}.postal`]} autoComplete="off" />
-    </div>
-  );
-}
-
-function PersonCard({ index, person, errors, canRemove, onChange, onRemove }: { index: number; person: Person; errors: Errors; canRemove: boolean; onChange: (patch: Partial<Person>) => void; onRemove: () => void }) {
+function PersonCard({ index, person, errors, countries, canRemove, onChange, onRemove }: { index: number; countries: CountryOption[]; person: Person; errors: Errors; canRemove: boolean; onChange: (patch: Partial<Person>) => void; onRemove: () => void }) {
   const k = `people.${index}`;
   const owner = person.roles.includes("Beneficial owner");
   return (
-    <fieldset className="space-y-3 border border-white/10 p-4">
-      <legend className="flex items-center gap-3 px-1 text-[0.8125rem] font-medium">
+    <fieldset className="border border-white/10 p-4">
+      <legend className="flex items-center gap-3 px-1 mb-3 text-[0.8125rem] font-medium">
         Person {index + 1}
         {canRemove && (
           <button type="button" aria-label={`Remove person ${index + 1}`} className="text-white/40 transition-colors hover:text-white" onClick={onRemove}>
@@ -49,7 +35,7 @@ function PersonCard({ index, person, errors, canRemove, onChange, onRemove }: { 
           {ROLES.map((r) => {
             const on = person.roles.includes(r);
             return (
-              <label key={r} className={`cursor-pointer border px-3 py-1 text-[0.75rem] transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-1 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-white ${on ? "border-white bg-white text-black" : "border-white/15 text-white/60 hover:text-white"}`}>
+              <label key={r} className={`m-0! cursor-pointer border px-3 py-1 text-[0.75rem]! transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-1 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-white ${on ? "border-white bg-white text-black!" : "border-white/15 text-white/60! hover:text-white!"}`}>
                 <input type="checkbox" className="sr-only" checked={on} onChange={() => onChange({ roles: on ? person.roles.filter((x) => x !== r) : [...person.roles, r] })} />
                 {r}
               </label>
@@ -60,7 +46,6 @@ function PersonCard({ index, person, errors, canRemove, onChange, onRemove }: { 
       </div>
       <div className="grid grid-cols-3 gap-3">
         <Text label="First name" value={person.first} onChange={(v) => onChange({ first: v })} error={errors[`${k}.first`]} autoComplete="off" />
-        <Text label="Middle name" value={person.middle} onChange={(v) => onChange({ middle: v })} optional autoComplete="off" />
         <Text label="Last name" value={person.last} onChange={(v) => onChange({ last: v })} error={errors[`${k}.last`]} autoComplete="off" />
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -72,14 +57,13 @@ function PersonCard({ index, person, errors, canRemove, onChange, onRemove }: { 
         <Select label="ID document type" value={person.idType} onChange={(v) => onChange({ idType: v })} options={ID_TYPES} error={errors[`${k}.idType`]} />
         <Text label="ID document number" value={person.idNumber} onChange={(v) => onChange({ idNumber: v })} error={errors[`${k}.idNumber`]} autoComplete="off" />
       </div>
-      <Heading>Residential address</Heading>
-      <AddressFields value={person.address} onChange={(address) => onChange({ address })} prefix={`${k}.address`} errors={errors} />
+      <Text label="Residential address" value={person.address} onChange={(address) => onChange({ address })} error={errors[`${k}.address`]} autoComplete="off" />
       <fieldset>
-        <legend className="mb-1.5 text-[0.75rem] font-medium text-white/70">Is this person a politically exposed person (PEP)?</legend>
+        <legend className="py-1 text-[0.75rem] font-medium text-white/70">Is this person a politically exposed person (PEP)?</legend>
         <div className="flex gap-6 text-[0.8125rem] text-white/70">
           {(["yes", "no"] as const).map((v) => (
-            <label key={v} className="flex cursor-pointer items-center gap-2">
-              <input type="radio" name={`pep-${index}`} checked={person.pep === v} onChange={() => onChange({ pep: v })} className="accent-white" />
+            <label key={v} className="m-0! flex! cursor-pointer items-center py-3 gap-2 text-[0.8125rem]! text-white/70!">
+              <input type="radio" name={`pep-${index}`} checked={person.pep === v} onChange={() => onChange({ pep: v })} className="m-0! min-h-0! p-0! accent-white" />
               {v === "yes" ? "Yes" : "No"}
             </label>
           ))}
@@ -95,7 +79,9 @@ export default function Onboard() {
   const [form, setForm] = useState<Form>(initialForm);
   const [errors, setErrors] = useState<Errors>({});
   const [submitted, setSubmitted] = useState<string | null>(null);
+  const [countries, setCountries] = useState<CountryOption[]>(fallbackCountries);
   const card = useRef<HTMLDivElement>(null);
+  useEffect(() => { fetchCountries().then(setCountries); }, []);
   const set = <K extends keyof Form>(key: K, value: Form[K]) => setForm((f) => ({ ...f, [key]: value }));
   const setPerson = (i: number, patch: Partial<Person>) => setForm((f) => ({ ...f, people: f.people.map((p, j) => (j === i ? { ...p, ...patch } : p)) }));
   const setDoc = (key: keyof Docs) => (file: File | null) => setForm((f) => ({ ...f, docs: { ...f.docs, [key]: file } }));
@@ -127,7 +113,7 @@ export default function Onboard() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-[#050505] font-[family-name:var(--font-ui)] text-[#f4f2ef]">
+    <div className="flex min-h-svh flex-col bg-black font-[family-name:var(--font-ui)] text-[#f4f2ef]">
       <Navbar />
 
       <main className="flex flex-1 items-center justify-center px-4 pb-14 pt-28"><div className="w-full max-w-3xl">
@@ -157,8 +143,8 @@ export default function Onboard() {
             <form noValidate onSubmit={(e) => { e.preventDefault(); onNext(); }} className="space-y-3">
               {step === 0 && (
                 <>
-                  <Text label="Legal name" hint="Exactly as registered" value={form.legalName} onChange={(v) => set("legalName", v)} error={errors.legalName} autoComplete="organization" />
-                  <Text label="Trading / brand name" value={form.tradingName} onChange={(v) => set("tradingName", v)} optional />
+                  <Text label="Legal Name" hint="Exactly as registered" value={form.legalName} onChange={(v) => set("legalName", v)} error={errors.legalName} autoComplete="organization" />
+                  <Text label="Trading / brand name " value={form.tradingName} onChange={(v) => set("tradingName", v)} optional />
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     <Select label="Country of incorporation" value={form.country} onChange={(v) => set("country", v)} options={countries} error={errors.country} />
                     <Select label="Entity type" value={form.entityType} onChange={(v) => set("entityType", v)} options={ENTITY_TYPES} error={errors.entityType} />
@@ -170,17 +156,13 @@ export default function Onboard() {
                   <TextArea label="What does the business do?" value={form.description} onChange={(v) => set("description", v)} error={errors.description} />
                   <Text label="Business email" type="email" hint="Where our reviewer will contact you" value={form.email} onChange={(v) => set("email", v)} error={errors.email} autoComplete="email" />
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    <Text label="Website" type="url" value={form.website} onChange={(v) => set("website", v)} optional placeholder="https://" />
-                    <Text label="Business phone" type="tel" value={form.phone} onChange={(v) => set("phone", v)} optional autoComplete="tel" />
+                    <Text label="Website " type="url" value={form.website} onChange={(v) => set("website", v)} optional placeholder="https://" />
+                    <Text label="Business Phone " type="tel" value={form.phone} onChange={(v) => set("phone", v)} optional autoComplete="tel" />
                   </div>
-                  <Heading>Registered address</Heading>
-                  <AddressFields value={form.registered} onChange={(a) => set("registered", a)} prefix="registered" errors={errors} />
+                  <Text label="Registered address" hint="Street, city, state / region and postal code" value={form.registered} onChange={(a) => set("registered", a)} error={errors.registered} autoComplete="off" />
                   <Checkbox checked={form.sameOperating} onChange={(v) => set("sameOperating", v)}>Our operating address is the same as the registered address</Checkbox>
                   {!form.sameOperating && (
-                    <>
-                      <Heading>Operating address</Heading>
-                      <AddressFields value={form.operating} onChange={(a) => set("operating", a)} prefix="operating" errors={errors} />
-                    </>
+                    <Text label="Operating address" value={form.operating} onChange={(a) => set("operating", a)} error={errors.operating} autoComplete="off" />
                   )}
                 </>
               )}
@@ -189,7 +171,7 @@ export default function Onboard() {
                 <>
                   {errors.people && <p role="alert" className="text-[0.8125rem] text-red-400">{errors.people}</p>}
                   {form.people.map((p, i) => (
-                    <PersonCard key={i} index={i} person={p} errors={errors} canRemove={form.people.length > 1}
+                    <PersonCard key={i} index={i} person={p} errors={errors} countries={countries} canRemove={form.people.length > 1}
                       onChange={(patch) => setPerson(i, patch)} onRemove={() => set("people", form.people.filter((_, j) => j !== i))} />
                   ))}
                   {form.people.length < MAX_PEOPLE && (
@@ -202,18 +184,20 @@ export default function Onboard() {
 
               {step === 2 && (
                 <>
-                  <FileField label="Certificate of incorporation" onChange={setDoc("incorporation")} error={errors.incorporation} />
-                  <FileField label="Proof of business address" hint="Utility bill or bank statement, under 3 months old" onChange={setDoc("addressProof")} error={errors.addressProof} />
-                  <FileField label="Government ID for each owner and director" hint="Combine into one PDF if needed" onChange={setDoc("ownerIds")} error={errors.ownerIds} />
-                  <FileField label="Shareholder register / ownership structure" hint="CAC status report in Nigeria" onChange={setDoc("shareholders")} error={errors.shareholders} />
+                  <FileField label="Certificate of incorporation" onChange={setDoc("incorporation")} optional />
+                  <FileField label="Proof of business address" hint="Utility bill or bank statement, under 3 months old" onChange={setDoc("addressProof")} optional />
+                  <FileField label="Government ID for each owner and director" hint="Combine into one PDF if needed" onChange={setDoc("ownerIds")} optional />
                   <FileField label="Memorandum and articles of association" onChange={setDoc("memorandum")} optional />
+                  <TextArea label="Anything we should know about your business or documents?" hint="If you can't provide a document, tell us why. We'll reach out, and can only proceed once we have all required documents." value={form.docsNote} onChange={(v) => set("docsNote", v)} optional />
                   <p className="text-[0.75rem] text-white/40">If upload isn't available yet, our reviewer will collect documents from you by email.</p>
                 </>
               )}
 
               {step === 3 && (
                 <>
-                  <Select label="Expected monthly API / RPC spend" value={form.spend} onChange={(v) => set("spend", v)} options={SPEND} error={errors.spend} />
+                  <Select label="Main RPC / API provider" value={form.rpcProvider} onChange={(v) => set("rpcProvider", v)} options={RPC_PROVIDERS} error={errors.rpcProvider} />
+                  <Select label="Estimated monthly usage" value={form.rpcUsage} onChange={(v) => set("rpcUsage", v)} options={RPC_USAGE} error={errors.rpcUsage} />
+                  <TextArea label="Other RPC / API providers you'd like us to support" value={form.otherProviders} onChange={(v) => set("otherProviders", v)} optional placeholder="e.g. a specific provider or data API" />
                   <TextArea label="Source of funds for settlement" value={form.sourceOfFunds} onChange={(v) => set("sourceOfFunds", v)} error={errors.sourceOfFunds} placeholder="e.g. Revenue from customer subscriptions" />
                   <TextArea label="Solana wallet(s) you'll settle from" value={form.wallets} onChange={(v) => set("wallets", v)} error={errors.wallets} hint="One per line or comma-separated. You'll prove ownership of each wallet later." />
                 </>
@@ -226,7 +210,8 @@ export default function Onboard() {
                     <dt className="text-white/40">Country</dt><dd>{countries.find((c) => c.value === form.country)?.label}</dd>
                     <dt className="text-white/40">People</dt><dd>{form.people.length}</dd>
                     <dt className="text-white/40">Documents</dt><dd>{Object.values(form.docs).filter(Boolean).length} uploaded</dd>
-                    <dt className="text-white/40">Monthly spend</dt><dd>{form.spend}</dd>
+                    <dt className="text-white/40">RPC provider</dt><dd>{form.rpcProvider}</dd>
+                    <dt className="text-white/40">Monthly usage</dt><dd>{form.rpcUsage}</dd>
                   </dl>
                   <Text label="Your full name" value={form.signerName} onChange={(v) => set("signerName", v)} error={errors.signerName} autoComplete="name" />
                   <Text label="Your title" value={form.signerTitle} onChange={(v) => set("signerTitle", v)} error={errors.signerTitle} autoComplete="organization-title" />
