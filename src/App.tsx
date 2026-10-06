@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 const Waitlist = lazy(() => import("./Waitlist"));
 const VIDEO_URL = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260808_112712_da9d53df-6d27-4b12-bdf6-aa9dc2622bdf.mp4";
 
@@ -94,7 +95,7 @@ export default function App() {
     setPayload({ business: String(data.get("business") ?? ""), community: data.get("community") === "on", socials: String(data.get("socials") ?? "") });
   }
 
-  return <div className="gate" ref={track} data-reduced={reduced || undefined}>
+  return <><div className="gate" ref={track} data-reduced={reduced || undefined}>
     <Navbar />
     <div className="stage">
       <div className="plate" ref={plate} aria-hidden="true">
@@ -146,5 +147,6 @@ export default function App() {
     {payload && <Suspense fallback={<p className="auth-status" role="status">Opening secure sign-in…</p>}>
       <Waitlist payload={payload} onClose={() => setPayload(null)} />
     </Suspense>}
-  </div>;
+  </div>
+  <Footer /></>;
 }
