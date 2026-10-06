@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import { FaGithub, FaXTwitter } from "react-icons/fa6";
+import type { IconType } from "react-icons";
 
 const GITHUB_URL = "https://github.com/Samisha68/Float-Finance";
 const X_URL = "https://x.com/float_fi";
-// TODO: confirm destinations. Product and onboarding links point at the closest existing page for now.
+
 const columns: { title: string; links: { label: string; href: string }[] }[] = [
   { title: "Product", links: [
     { label: "Infrastructure", href: "/docs/architecture" },
@@ -13,7 +15,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
   { title: "Developers", links: [{ label: "Documentation", href: "/docs" }] },
   { title: "Onboarding", links: [
     { label: "Service Provider", href: "/docs/get-started" },
-    { label: "Business", href: "/" },
+    { label: "Business", href: "/onboard" },
   ] },
   { title: "Company", links: [
     { label: "About", href: "/docs/overview" },
@@ -21,8 +23,8 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
   ] },
 ];
 const socials = [
-  { label: "X / Twitter", href: X_URL },
-  { label: "GitHub", href: GITHUB_URL },
+  { label: "X / Twitter", href: X_URL, Icon: FaXTwitter },
+  { label: "GitHub", href: GITHUB_URL, Icon: FaGithub },
 ];
 
 // Geometry of the arc in viewBox units: the top of an ellipse rising out of the bottom edge.
@@ -38,7 +40,6 @@ const primary = [
 ];
 const minorNodes = [90, 260, 1140, 1310].map((x) => ({ x, y: arcY(x) }));
 
-// Deterministic scatter, so the field never reshuffles between renders.
 function makeParticles(count: number) {
   let seed = 7;
   const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -72,8 +73,6 @@ export default function Footer() {
     return () => clearInterval(id);
   }, [reduced]);
 
-  // The SVG uses "slice", so its scale and crop follow the container width; mirror that to place
-  // the HTML nodes and badges, keeping them on the arc and inside the viewport on narrow screens.
   const scale = Math.max(width / VB_W, 1);
   const place = (x: number) => {
     const px = Math.min(Math.max(width / 2 + (x - CX) * scale, 64), width - 64);
@@ -132,7 +131,6 @@ export default function Footer() {
           />
         </svg>
 
-        {/* Dissolves the arch into the navigation panel below. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-[#0B0B0B]/60 to-[#0B0B0B]" />
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 h-24 backdrop-blur-[6px]"
@@ -144,7 +142,7 @@ export default function Footer() {
           const on = active === i;
           return (
             <div key={node.label} className="absolute" style={{ left, top }}>
-              {/* Badge, with a hairline dropping to the node. */}
+
               <div className="absolute bottom-0 left-0 flex -translate-x-1/2 flex-col items-center">
                 <span
                   className="whitespace-nowrap rounded-sm border px-2 py-1 text-[0.6875rem] font-medium tracking-wide bg-[#111111] transition-[color,border-color,box-shadow] duration-500 max-[480px]:px-1.5 max-[480px]:text-[0.625rem]"
@@ -152,7 +150,7 @@ export default function Footer() {
                 >{node.label}</span>
                 <span className="block h-10 w-px" style={{ background: `linear-gradient(to bottom, ${on ? "#FFFFFF" : "#888888"}, transparent)`, opacity: on ? 0.7 : 0.35 }} />
               </div>
-              {/* Node: grey ring, white dot, soft white pulse while active. */}
+
               <span className="absolute -left-2.5 -top-2.5 block h-5 w-5 rounded-full border border-[#444444] bg-black" />
               <span className="absolute -left-[3px] -top-[3px] block h-1.5 w-1.5 rounded-full bg-white" />
               <motion.span
@@ -167,34 +165,47 @@ export default function Footer() {
         })}
       </div>
 
-      <div className="mx-auto w-full max-w-[1440px] px-6 pt-14 pb-10 md:px-12 md:pt-20 lg:px-16">
-        <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 md:gap-x-12">
-          {columns.map((col) => (
-            <div key={col.title}>
-              <h3 className="mb-4 text-sm font-semibold text-white md:text-[0.9375rem]">{col.title}</h3>
-              <ul className="m-0 flex list-none flex-col gap-3 p-0">
-                {col.links.map((link) => (
-                  <li key={link.label}><a href={link.href} className={linkClass} {...(link.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{link.label}</a></li>
-                ))}
-              </ul>
+      <div className="mx-auto w-full max-w-[1440px] px-8 pt-14 pb-10 sm:px-12 md:px-20 md:pt-20 lg:px-28 xl:px-36">
+        <div className="grid gap-12 lg:grid-cols-[minmax(11rem,1fr)_3fr] lg:gap-16">
+          <div className="flex flex-col justify-between gap-10 lg:min-h-[17rem]">
+            <a href="/" aria-label="Float home" className="inline-flex w-fit">
+              <img src="/docs-assets/logo-dark.svg" alt="" className="h-6 w-auto" />
+            </a>
+            <div className="hidden items-center gap-5 lg:flex">
+              {socials.map((s) => <SocialIcon key={s.label} {...s} />)}
             </div>
-          ))}
-        </nav>
+          </div>
 
-        <div className="mt-14 flex flex-wrap gap-3 md:mt-20">
-          {socials.map((s) => (
-            <a
-              key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
-              className="border border-[#333333] bg-transparent px-4 py-2 text-[0.8125rem] font-medium text-white transition-colors hover:border-[#666666] hover:bg-white/5 focus-visible:border-[#666666] focus-visible:bg-white/5"
-            >{s.label}</a>
-          ))}
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 md:gap-x-10">
+            {columns.map((col) => (
+              <div key={col.title}>
+                <h3 className="mb-5 text-sm font-semibold text-white md:text-[0.9375rem]">{col.title}</h3>
+                <ul className="m-0 flex list-none flex-col gap-3.5 p-0">
+                  {col.links.map((link) => (
+                    <li key={link.label}><a href={link.href} className={linkClass} {...(link.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{link.label}</a></li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-5 lg:hidden">
+            {socials.map((s) => <SocialIcon key={s.label} {...s} />)}
+          </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-[#262626] pt-6 text-xs text-[#666666] md:flex-row md:items-center md:justify-between">
+        <div className="mt-14 flex flex-col gap-2 border-t border-[#262626] pt-6 text-xs text-[#666666] md:mt-16 md:flex-row md:items-center md:justify-between">
           <p className="m-0">© 2026 FLOAT. All rights reserved.</p>
-          <p className="m-0">Credit infrastructure for the internet economy.</p>
         </div>
       </div>
     </footer>
+  );
+}
+
+function SocialIcon({ label, href, Icon }: { label: string; href: string; Icon: IconType }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="text-[#888888] transition-colors hover:text-white focus-visible:text-white">
+      <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
+    </a>
   );
 }

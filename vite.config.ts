@@ -47,6 +47,7 @@ function docsDevRoutes() {
     configureServer(server: ViteDevServer) {
       server.middlewares.use((req, _res, next) => {
         if (req.url && /^\/docs(?:[/?#]|$)/.test(req.url)) req.url = "/docs.html";
+        else if (req.url && /^\/onboard(?:[/?#]|$)/.test(req.url)) req.url = "/onboard.html";
         next();
       });
     },
@@ -77,6 +78,6 @@ const docsMdx = {
 export default defineConfig({
   plugins: [docsMdx, react({ include: /\.(mdx|js|jsx|ts|tsx)$/ }), tailwindcss(), waitlistDevApi(), docsDevRoutes()],
   build: {
-    rollupOptions: { input: { main: "index.html", docs: "docs.html" } },
+    rollupOptions: { input: { main: "index.html", docs: "docs.html", onboard: "onboard.html" } },
   },
 });

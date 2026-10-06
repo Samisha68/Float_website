@@ -12,6 +12,7 @@ const links: NavLink[] = [
   { label: "How it works", href: "#how-it-works" },
   { label: "Providers", href: "#providers" },
   { label: "Docs", href: "/docs" },
+  { label: "Onboard", href: "/onboard" },
 ];
 
 const resources: NavLink[] = [
@@ -48,6 +49,9 @@ export default function Navbar() {
     document.addEventListener("keydown", onKeyDown);
     return () => { document.removeEventListener("pointerdown", onPointerDown); document.removeEventListener("keydown", onKeyDown); };
   }, [resourcesOpen, mobileOpen]);
+
+  // On pages other than home, section anchors point back to the home page's sections.
+  const resolve = (href: string) => (href.startsWith("#") && typeof location !== "undefined" && location.pathname !== "/" ? `/${href}` : href);
 
   // Every link closes the menus. In-page links scroll smoothly when their section exists;
   // otherwise the browser's default hash behaviour applies.
@@ -94,7 +98,7 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center gap-8">
             {links.map((link) => (
-              <a key={link.label} href={link.href} className={linkClass} onClick={(event) => follow(event, link.href)}>{link.label}</a>
+              <a key={link.label} href={resolve(link.href)} className={linkClass} onClick={(event) => follow(event, resolve(link.href))}>{link.label}</a>
             ))}
             <div className="relative">
               <button
@@ -144,7 +148,7 @@ export default function Navbar() {
         {mobileOpen && (
           <div id="mobile-menu" className="md:hidden absolute top-full left-0 right-0 mt-3 bg-black/90 backdrop-blur-xl border border-neutral-600 p-2 shadow-2xl">
             {links.map((link) => (
-              <a key={link.label} href={link.href} className={itemClass} onClick={(event) => follow(event, link.href)}>{link.label}</a>
+              <a key={link.label} href={resolve(link.href)} className={itemClass} onClick={(event) => follow(event, resolve(link.href))}>{link.label}</a>
             ))}
             <p className="px-3 pt-3 pb-1 text-[0.6875rem] font-medium uppercase tracking-wider text-white/40">Resources</p>
             {resources.map((link) => (
