@@ -5,6 +5,7 @@ import { FaArrowRight } from "react-icons/fa6";
 import { components, DocLink } from "./components";
 import { INDEX_SLUG, pageForPath, pages, sections, type DocPage } from "./pages";
 import { applyStoredTheme, toggleTheme } from "./theme";
+import "../typography.css";
 import "./float.css";
 import "./docs.css";
 

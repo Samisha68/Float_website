@@ -15,6 +15,7 @@
     "estree-util-value-to-estree": "^3.5.0",
     "github-slugger": "^2.0.0",
     "jose": "^6.2.12",
+    "lucide-react": "^1.52.0",
     "mdast-util-to-string": "^4.0.0",
     "mermaid": "^12.1.0",
     "postgres": "^3.4.9",
