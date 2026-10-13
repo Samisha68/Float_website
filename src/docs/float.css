@@ -70,7 +70,7 @@
 
   .float-eyebrow {
     display: inline-block;
-    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-family: var(--font-ui);
     font-size: 0.72rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -96,7 +96,7 @@
     background-image:
       linear-gradient(var(--float-grid-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--float-grid-line) 1px, transparent 1px);
-    background-size: 28px 28px;
+    background-size: 1.75rem 1.75rem;
     pointer-events: none;
   }
 
@@ -148,7 +148,7 @@
   }
 
   .float-btn:active {
-    transform: translate(2px, 2px);
+    transform: translate(0.125rem, 0.125rem);
     box-shadow: none;
   }
 
@@ -166,7 +166,7 @@
     padding: 0.25rem 0.7rem;
     border: 1px solid var(--float-line);
     border-radius: 0;
-    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-family: var(--font-ui);
     font-size: 0.72rem;
     color: var(--float-muted);
     background: var(--float-surface);
@@ -174,15 +174,15 @@
 
   .float-pill::before {
     content: "";
-    width: 6px;
-    height: 6px;
+    width: 0.375rem;
+    height: 0.375rem;
     border-radius: 0;
     background: var(--float-text);
   }
 
   .float-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(9.375rem, 1fr));
     gap: 1rem;
     margin: 1.5rem 0 2rem;
   }
@@ -197,7 +197,7 @@
 
   .float-stat strong {
     display: block;
-    font-family: "Inter", sans-serif;
+    font-family: var(--font-ui);
     font-size: 1.6rem;
     font-weight: 600;
     letter-spacing: -0.03em;
@@ -219,7 +219,7 @@
     background-image:
       linear-gradient(var(--float-grid-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--float-grid-line) 1px, transparent 1px);
-    background-size: 28px 28px;
+    background-size: 1.75rem 1.75rem;
   }
 
   .float-footer__glow {
@@ -235,7 +235,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
     gap: 3rem;
-    max-width: 1280px;
+    max-width: 80rem;
     margin: 0 auto;
     padding: 3rem 1.5rem 2rem;
   }
@@ -246,7 +246,7 @@
     gap: 0.65rem;
     color: var(--float-text) !important;
     text-decoration: none !important;
-    font-family: "Inter", sans-serif;
+    font-family: var(--font-ui);
     font-weight: 600;
     letter-spacing: 0.12em;
   }
@@ -268,14 +268,14 @@
     border-radius: 0;
     box-shadow: var(--float-shadow-sm);
     background: var(--float-surface);
-    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-family: var(--font-ui);
     font-size: 0.72rem;
     color: var(--float-muted);
   }
 
   .float-footer__dot {
-    width: 6px;
-    height: 6px;
+    width: 0.375rem;
+    height: 0.375rem;
     border-radius: 0;
     background: var(--float-text);
   }
@@ -288,7 +288,7 @@
 
   .float-footer__col h4 {
     margin: 0 0 0.9rem;
-    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-family: var(--font-ui);
     font-size: 0.72rem;
     font-weight: 500;
     letter-spacing: 0.16em;
@@ -317,7 +317,7 @@
   .float-footer__col a:hover {
     opacity: 1;
     text-decoration: underline !important;
-    text-underline-offset: 3px;
+    text-underline-offset: 0.1875rem;
   }
 
   .float-footer__bar {
@@ -325,11 +325,11 @@
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 0.5rem;
-    max-width: 1280px;
+    max-width: 80rem;
     margin: 0 auto;
     padding: 1.25rem 1.5rem 2rem;
     border-top: 1px solid var(--float-line);
-    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-family: var(--font-ui);
     font-size: 0.72rem;
     color: var(--float-muted);
   }
@@ -363,8 +363,8 @@
     background-image:
       linear-gradient(var(--float-grid-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--float-grid-line) 1px, transparent 1px);
-    background-size: 28px 28px;
-    font-family: "Inter", sans-serif !important;
+    background-size: 1.75rem 1.75rem;
+    font-family: var(--font-body) !important;
   }
 
   svg[aria-roledescription] rect,
@@ -420,7 +420,7 @@
   svg[aria-roledescription] .edgeLabel p {
     background-color: var(--float-surface) !important;
     color: var(--float-muted) !important;
-    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-family: var(--font-ui);
     font-size: 0.85em;
   }
 
@@ -437,7 +437,7 @@
   svg[aria-roledescription] text,
   svg[aria-roledescription] tspan {
     fill: var(--float-text) !important;
-    font-family: "Inter", sans-serif !important;
+    font-family: var(--font-body) !important;
   }
 
   /* Sequence: participants, lifelines, messages, notes */
@@ -459,8 +459,8 @@
 
   svg[aria-roledescription] .messageText,
   svg[aria-roledescription] .messageText tspan {
-    font-family: "JetBrains Mono", ui-monospace, monospace !important;
-    font-size: 12px !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.75rem !important;
   }
 
   svg[aria-roledescription] .sequenceNumber {
