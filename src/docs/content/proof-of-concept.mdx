@@ -5,37 +5,34 @@ section: Concepts
 order: 4
 ---
 
-This page describes the proof-of-concept credit-line flow for API/RPC providers. The credit-line mechanics (facilities, usage, limits, settlements, on-chain observation) are built. Underwriting and KYB are interim. Each section says which is which. See the [Roadmap](/roadmap) for the full list.
+This page describes the proof-of-concept credit-line flow for providers such as RPC, API, indexer and SaaS companies. The credit-line mechanics (facilities, usage, limits, settlements, on-chain observation) are built. Underwriting is interim. Each section says which is which. See the [Roadmap](/roadmap) for the full list.
 
-<CardGroup cols={4}>
-  <Card title="Relationship" icon="fa-solid fa-handshake" href="#service-provider-float-small-business">
+<CardGroup cols={3}>
+  <Card title="Relationship" icon="fa-solid fa-handshake" href="#provider-float-business">
     Who does what
   </Card>
   <Card title="Tiers" icon="fa-solid fa-stairs" href="#tiers-for-higher-limits">
     How limits grow
-  </Card>
-  <Card title="KYB" icon="fa-solid fa-id-card" href="#know-your-business-kyb">
-    Verifying businesses
   </Card>
   <Card title="Underwriting" icon="fa-solid fa-scale-balanced" href="#underwriting">
     Interim engine
   </Card>
 </CardGroup>
 
-## Service provider, Float, small business
+## Provider, Float, business
 
-The core credit-line relationship. Float scores the business and sends the provider a credit-limit attestation. The provider serves API calls on credit, and the business settles through an auto-deducted Solana delegation. Usage and settlement events flow back to Float and update reputation.
+The core credit-line relationship. Float scores the business and sends the provider a credit-limit attestation. The provider serves usage on credit, and the business settles through an auto-deducted Solana delegation. Usage and settlement events flow back to Float and update the Float Score, the portable reputation built only from repayments Float verifies on-chain.
 
 ```mermaid
 flowchart LR
   F["Float<br/>scores the business"]
-  SP["API/RPC provider"]
-  B["Small business"]
-  subgraph SOL["Solana · funds move here only. Float never holds, routes or moves funds"]
+  SP["Provider"]
+  B["Business"]
+  subgraph SOL["Solana · funds move only through the capped, revocable delegation the business signs"]
     D["Auto-deducted delegation<br/>Subscriptions & Allowances"]
   end
   F -->|"1 · credit-limit attestation"| SP
-  SP -->|"2 · serves API calls on credit"| B
+  SP -->|"2 · serves usage on credit"| B
   B -->|"3 · usage settles"| D
   D -->|"3 · settlement pulled"| SP
   SP -.->|"4 · usage + settlement events"| F
@@ -44,18 +41,18 @@ flowchart LR
 
 <CardGroup cols={3}>
   <Card title="Float" icon="fa-solid fa-shield-halved">
-    Scores, attests and records. Reputation is built from what Float verifies on-chain.
+    Sets limits, tracks repayment and verifies it on-chain. The Float Score is built from what Float verifies.
   </Card>
   <Card title="Provider" icon="fa-solid fa-server">
-    Holds the capital, serves the calls and reports usage. The limit caps **unsettled usage**.
+    Chooses which businesses can borrow, serves the usage and reports it. The limit caps **unsettled usage**.
   </Card>
   <Card title="Business" icon="fa-solid fa-store">
-    Uses the API on credit. Settlement is a delegation the business controls on-chain.
+    Uses the service on credit. Settlement is a capped delegation the business signs and can revoke at any time.
   </Card>
 </CardGroup>
 
 <Warning>
-Float is **not** the lender or the custodian here. The provider extends the credit, and the delegation moves funds directly from the business to the provider. Float observes and attests.
+Funds move only through the capped, revocable delegation the business signs. The business can revoke it at any time. Float manages limits, repayment tracking and verification, and observes settlement on-chain.
 </Warning>
 
 ## Tiers for higher limits
@@ -66,7 +63,7 @@ Limit and rate move together as a function of settlement history. Each clean cyc
 flowchart LR
   A["Credit extended<br/>at current terms"] --> B["Usage &<br/>settlement"]
   B --> C["Verified on-chain"]
-  C --> D["Reputation updates"]
+  C --> D["Float Score updates"]
   D --> E["Terms reassessed"]
   E --> A
 ```
@@ -78,33 +75,18 @@ flowchart LR
 | After two clean cycles | $3,500 | 2.2% | +$1,000 (+40%) |
 
 <Note>
-These numbers are **illustrative**. Today's first version of credit reputation counts only settled periods and failed settlement pulls, observed on-chain. See the [Roadmap](/roadmap) for what the next version still has to decide.
+These numbers are **illustrative**. Today's first version of credit reputation counts only settled periods and failed settlement pulls, observed on-chain. The Float Score output is still being built. See the [Roadmap](/roadmap) for what the next version still has to decide.
 </Note>
-
-## Know-Your-Business (KYB)
-
-The pre-check before a business's first credit line, when no on-chain reputation exists yet. A pass or fail feeds into the first underwriting assessment as one input.
-
-```mermaid
-flowchart LR
-  A["Business onboards"] -.-> B["KYB + wallet<br/>sanctions screening<br/>in progress"]
-  B -.->|"pass / fail"| C["Input to first<br/>underwriting assessment"]
-```
-
-<Warning>
-**In progress, not live.** Until the KYB integration is finished, businesses stay unverified. Test keys use a sandbox; live keys return `503`. The dashed lines show the flow that is being built.
-</Warning>
 
 ## Underwriting
 
-How a credit-line request becomes an assessment, and then a credit facility.
+How a credit-line request becomes an assessment, and then a credit facility. The assessment includes a risk band, and that band feeds the Float Score, which is still being built.
 
 ```mermaid
 flowchart TB
   A["Credit-line request<br/>submitted"] --> B["Handed to the<br/>underwriting engine"]
   subgraph POC["Interim POC engine · not the final engine"]
-    direction LR
-    K["KYB / sanctions result"] --> R["Conservative<br/>fixed-limit rule"]
+    R["Conservative<br/>fixed-limit rule"]
   end
   B --> POC
   POC --> S["Assessment stored"]
@@ -120,7 +102,7 @@ flowchart TB
     Float hands the request to the underwriting engine.
   </Step>
   <Step title="Interim assessment">
-    The POC engine combines the KYB and sanctions result with a conservative fixed-limit rule. The real engine isn't built yet.
+    The POC engine applies a conservative fixed-limit rule. The real engine isn't built yet.
   </Step>
   <Step title="Store and open the facility">
     The assessment is stored, and a credit facility is created with its approved limit, connected provider and reset cadence.
@@ -128,5 +110,5 @@ flowchart TB
 </Steps>
 
 <Note>
-This is the **interim** version. Live keys return `503` until an engine is connected, and sandbox results are test-only. The final engine and risk band taxonomy are still open.
+This is the **interim** version. Live keys return `503` until an engine is connected, and sandbox results are test-only. The final engine and risk band taxonomy are still open. A rules-based scorecard built on provider payment history and wallet checks is planned, and is not built.
 </Note>

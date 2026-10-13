@@ -1,15 +1,16 @@
 ---
 title: Get started
-subtitle: From a test key to your first Float assessment in four calls
+subtitle: From a test key to your first credit line assessment in three calls
 section: Start here
 order: 1
 ---
 
 <div className="float-hero">
-  <h2>Credit infrastructure that <span className="float-gradient-text">proves itself</span>.</h2>
+  <h2>Programmable credit for <span className="float-gradient-text">any provider</span>.</h2>
   <p>
-    Float underwrites receivables, records the obligations you finance, and turns on-chain
-    repayments into portable business reputation. You keep the capital and every decision.
+    Float sets limits, manages the credit line and tracks repayment through a capped, revocable
+    on-chain delegation. Each verified repayment builds the Float Score, a portable reputation
+    that follows the business to the next provider.
   </p>
   <div className="float-hero__actions">
     <a className="float-btn float-btn--primary" href="#quickstart">Run the quickstart →</a>
@@ -21,26 +22,51 @@ order: 1
 ## What Float gives you
 
 <CardGroup cols={3}>
-  <Card title="Underwriting" icon="fa-solid fa-file-invoice-dollar" href="/overview#the-partner-journey">
-    Submit an invoice or credit line, get back a risk band, confidence and reason codes.
+  <Card title="Credit lines" icon="fa-solid fa-file-invoice-dollar" href="/overview#the-journey">
+    Submit a credit-line request, get back a risk band, confidence and reason codes, and a credit facility with a limit.
   </Card>
-  <Card title="Obligations" icon="fa-solid fa-link" href="/overview#partner-reported-vs-float-verified">
-    Register what you financed. Float binds on-chain repayments to it.
+  <Card title="Verified repayment" icon="fa-solid fa-link" href="/proof-of-concept">
+    Repayment is auto-deducted through a delegation the business signs. Float verifies it on-chain.
   </Card>
-  <Card title="Reputation" icon="fa-solid fa-shield-halved" href="/architecture#partner-reported-state-vs-float-verified-evidence">
-    Portable, consent-gated, built only from evidence Float verifies.
+  <Card title="Float Score" icon="fa-solid fa-shield-halved" href="/architecture#provider-reported-state-vs-float-verified-evidence">
+    Portable, consent-gated, built only from evidence Float verifies. The score output is still being built.
   </Card>
 </CardGroup>
 
 <Warning>
-Float is **not** a lender, pool, custodian or payment processor. It never holds or moves funds.
+Funds move only through the capped, revocable delegation the business signs. The business can revoke it at any time. Float manages limits, repayment tracking and verification.
 </Warning>
 
 ## Explore by product
 
 <Tabs>
-  <Tab title="Invoice financing">
-    The default flow (`kind: invoice`). You submit a receivable, Float returns an assessment, you decide and finance.
+  <Tab title="Credit lines">
+    Credit lines use `kind: credit_line` on the underwriting endpoint. The credit-line flow is still a proof of concept. See [Proof of concept](/proof-of-concept).
+
+    | Step | Call | You get |
+    |---|---|---|
+    | 1 | `POST /v1/businesses` | `biz_…`, created or linked |
+    | 2 | `POST /v1/underwriting_requests` | `uwr_…` with status `pending` |
+    | 3 | `GET /v1/underwriting_requests/{id}` | An assessment once `completed` |
+
+    <Tip>There is no approve/decline field and no price in an assessment. The decision to offer credit is the provider's.</Tip>
+  </Tab>
+  <Tab title="Float Score">
+    The Float Score is a **read** over Float-verified outcomes. It never includes amounts, providers or invoices.
+
+    <CardGroup cols={2}>
+      <Card title="Consent first" icon="fa-solid fa-user-check">
+        Record it with `PUT /v1/businesses/{id}/consent`. Without it, reads return `403`.
+      </Card>
+      <Card title="Verified only" icon="fa-solid fa-circle-check">
+        Provider reports never count. Only chain observations Float makes itself.
+      </Card>
+    </CardGroup>
+
+    <Note>The reputation `band` is `null` today. The score output is still being built.</Note>
+  </Tab>
+  <Tab title="Invoices (later)">
+    Invoice underwriting (`kind: invoice`) shares the same engine, but it is not the focus of the credit-line flow. It is kept here for reference.
 
     | Step | Call | You get |
     |---|---|---|
@@ -49,31 +75,22 @@ Float is **not** a lender, pool, custodian or payment processor. It never holds 
     | 3 | `GET /v1/underwriting_requests/{id}` | An assessment once `completed` |
     | 4 | `POST /v1/obligations` | `obl_…` plus a `repayment_reference` |
 
-    <Tip>There is no approve/decline field and no price in an assessment. That decision is yours.</Tip>
-  </Tab>
-  <Tab title="Credit lines">
-    API/RPC credit lines use `kind: credit_line` on the **same** underwriting and reputation engine.
-
-    | Shared with invoices | Specific to credit lines |
-    |---|---|
-    | Businesses and consent | Float-wide ceilings with fixed per-provider shares |
-    | Underwriting lifecycle | Credit facilities, usage, live limit, settlements |
-    | Events and webhooks | Solana Subscriptions & Allowances delegations |
-    | Reputation engine | `chain_observed_credit` outcome policy |
-
-    <Note>The credit-line flow is still a proof of concept. See [Proof of concept](/proof-of-concept).</Note>
-  </Tab>
-  <Tab title="Reputation">
-    Reputation is a **read** over Float-verified outcomes. It never includes amounts, partners or invoices.
-
-    <CardGroup cols={2}>
-      <Card title="Consent first" icon="fa-solid fa-user-check">
-        Record it with `PUT /v1/businesses/{id}/consent`. Without it, reads return `403`.
-      </Card>
-      <Card title="Verified only" icon="fa-solid fa-circle-check">
-        Partner reports never count. Only chain observations Float makes itself.
-      </Card>
-    </CardGroup>
+    ```bash
+    curl -X POST https://api.float.xyz/v1/underwriting_requests \
+      -H "Authorization: Bearer $FLOAT_API_KEY" \
+      -H "Content-Type: application/json" \
+      -H "Idempotency-Key: $(uuidgen)" \
+      -d '{
+        "business": "biz_01J…",
+        "invoice": {
+          "invoice_number": "INV-2026-0091",
+          "amount": { "amount": "4500000", "currency": "USD" },
+          "issue_date": "2026-09-01",
+          "due_date": "2026-11-30",
+          "debtor": { "name": "Acme Retail Plc", "country": "NG" }
+        }
+      }'
+    ```
   </Tab>
 </Tabs>
 
@@ -125,8 +142,10 @@ Float is **not** a lender, pool, custodian or payment processor. It never holds 
     ```
     </CodeBlocks>
   </Step>
-  <Step title="Submit an invoice">
+  <Step title="Request a credit line">
     Underwriting is asynchronous: you get `202` and status `pending`.
+
+    {/* TODO: the credit_line request payload is not documented anywhere yet. This keeps the existing request structure (business + kind) and omits any credit-line fields. Replace with the real payload once it is agreed. */}
 
     ```bash
     curl -X POST https://api.float.xyz/v1/underwriting_requests \
@@ -135,24 +154,19 @@ Float is **not** a lender, pool, custodian or payment processor. It never holds 
       -H "Idempotency-Key: $(uuidgen)" \
       -d '{
         "business": "biz_01J…",
-        "invoice": {
-          "invoice_number": "INV-2026-0091",
-          "amount": { "amount": "4500000", "currency": "USD" },
-          "issue_date": "2026-09-01",
-          "due_date": "2026-11-30",
-          "debtor": { "name": "Acme Retail Plc", "country": "NG" }
-        }
+        "kind": "credit_line"
       }'
     ```
   </Step>
   <Step title="Read the assessment">
-    Poll the request, or follow `GET /v1/events`. A completed request embeds the assessment.
+    Poll `GET /v1/underwriting_requests/{id}`, or follow `GET /v1/events`. A completed request embeds the assessment. The band feeds the Float Score, which is still being built.
+
+    {/* TODO: this assessment example is the documented invoice shape, trimmed. The credit_line assessment fields are not documented yet. */}
 
     ```json
     "assessment": {
       "band": { "key": "moderate_risk", "label": "Moderate risk", "ordinal": 2, "of": 3 },
       "confidence": { "level": "medium" },
-      "verification": { "invoice": "verified", "debtor": "partially_verified", "business": "unverified" },
       "reasons": [{ "code": "DEBTOR_PAYMENT_HISTORY_LIMITED", "direction": "negative" }]
     }
     ```
@@ -161,7 +175,11 @@ Float is **not** a lender, pool, custodian or payment processor. It never holds 
 
 ## Sandbox
 
-With a `fk_test_` key, an invoice-number suffix picks the outcome. Try `INV-0091-SBX-REJECT`.
+With a `fk_test_` key, underwriting is a sandbox that returns mock results. Sandbox assessments carry `engine.name: "float-sandbox"` and a `SANDBOX_RESULT` reason. They are not real assessments.
+
+{/* TODO: the outcome suffixes below are documented for invoice numbers only. Confirm how, or whether, they apply to credit-line requests. */}
+
+For invoices, an invoice-number suffix picks the outcome. Try `INV-0091-SBX-REJECT`.
 
 | Suffix | Outcome |
 |---|---|
@@ -173,12 +191,10 @@ With a `fk_test_` key, an invoice-number suffix picks the outcome. Try `INV-0091
 | `-SBX-SILENT` | stays `processing` until the SLA timeout |
 | `-SBX-UNAVAILABLE` | retried, then `failed` / `underwriting_dispatch_failed` |
 
-<Info>Sandbox assessments carry `engine.name: "float-sandbox"` and a `SANDBOX_RESULT` reason. They are not real assessments.</Info>
-
 ## Explore by role
 
 <Tabs>
-  <Tab title="Platform engineer">
+  <Tab title="Provider engineer">
     <CardGroup cols={2}>
       <Card title="Integration at a glance" icon="fa-solid fa-plug" href="/overview#integration-at-a-glance">
         Auth, idempotency, money and IDs.
@@ -190,8 +206,8 @@ With a `fk_test_` key, an invoice-number suffix picks the outcome. Try `INV-0091
   </Tab>
   <Tab title="Risk & ops">
     <CardGroup cols={2}>
-      <Card title="Reported vs verified" icon="fa-solid fa-scale-balanced" href="/architecture#partner-reported-state-vs-float-verified-evidence">
-        What counts toward reputation, and what never does.
+      <Card title="Reported vs verified" icon="fa-solid fa-scale-balanced" href="/architecture#provider-reported-state-vs-float-verified-evidence">
+        What counts toward the Float Score, and what never does.
       </Card>
       <Card title="What's live" icon="fa-solid fa-signal" href="/roadmap">
         Real today vs still an interface.

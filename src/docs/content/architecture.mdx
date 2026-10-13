@@ -8,29 +8,29 @@ order: 3
 ## Design principles
 
 <CardGroup cols={2}>
-  <Card title="Non-custodial" icon="fa-solid fa-hand">
-    Float never holds, routes or moves funds. Partners control the capital and make every financing decision. Float records and verifies.
+  <Card title="Capped, revocable delegation" icon="fa-solid fa-hand">
+    Funds move only through the capped, revocable delegation the business signs. The business can revoke it at any time. Float manages limits, repayment tracking and verification.
   </Card>
   <Card title="Verified evidence only" icon="fa-solid fa-circle-check">
-    Portable reputation is built only from outcomes Float verifies itself, never from what a partner reports.
+    The Float Score, the portable reputation of a business, is built only from outcomes Float verifies itself, never from what a provider reports.
   </Card>
-  <Card title="Partner-scoped data" icon="fa-solid fa-lock">
-    A partner sees its own data. The one deliberate exception is reputation, which is shared across partners with the business's consent.
+  <Card title="Provider-scoped data" icon="fa-solid fa-lock">
+    A provider sees its own data. The one deliberate exception is the Float Score, which is shared across providers with the business's consent.
   </Card>
   <Card title="Isolated environments" icon="fa-solid fa-flask">
     Test and live are fully separate. Test data never mixes with live data.
   </Card>
 </CardGroup>
 
-## Partner-reported state vs Float-verified evidence
+## Provider-reported state vs Float-verified evidence
 
 The most important rule in Float.
 
-| | Partner-reported state | Float-verified evidence |
+| | Provider-reported state | Float-verified evidence |
 |---|---|---|
-| **Source** | Reports a partner sends to Float | Float's own on-chain observation |
-| **Used for** | The partner's bookkeeping | Portable reputation |
-| **Affects reputation?** | ❌ **Never** | ✅ **Yes, the only input** |
+| **Source** | Reports a provider sends to Float | Float's own on-chain observation |
+| **Used for** | The provider's bookkeeping | The Float Score |
+| **Affects the Float Score?** | ❌ **Never** | ✅ **Yes, the only input** |
 
 <CardGroup cols={3}>
   <Card title="Reports stay reports" icon="fa-solid fa-eye-slash">
@@ -45,22 +45,22 @@ The most important rule in Float.
 </CardGroup>
 
 <Note>
-Float-verified evidence only exists where on-chain observation is enabled. Where it is off, repayments are marked as not verifiable and reputation stays empty. See the [Roadmap](/roadmap) for what is enabled today.
+Float-verified evidence only exists where on-chain observation is enabled. Where it is off, repayments are marked as not verifiable and reputation stays empty. The Float Score output itself is still being built: the reputation `band` is `null` today. See the [Roadmap](/roadmap) for what is enabled today.
 </Note>
 
 ## Verifiable assessments
 
-Float can prove it issued a specific assessment, the exact outcome and terms, without putting any private business or invoice data anywhere public.
+Float can prove it issued a specific assessment, the exact outcome and terms, without putting any private business data anywhere public.
 
-Only a small cryptographic **fingerprint** of the assessment's public-safe facts ever becomes public. The private detail stays with the partner that owns the assessment, who can show it selectively to whoever they choose, such as a lender or an auditor. That party can then check the detail they were shown against the fingerprint, **without taking Float's word for it**.
+Only a small cryptographic **fingerprint** of the assessment's public-safe facts ever becomes public. The private detail stays with the provider that owns the assessment, who can show it selectively to whoever they choose, such as another provider or an auditor. That party can then check the detail they were shown against the fingerprint, **without taking Float's word for it**.
 
 ```mermaid
 flowchart TB
   A["Assessment created"] --> B["Fingerprint of the<br/>public-safe facts<br/>generated and stored"]
-  A --> C["Full private detail<br/>available only to the<br/>owning partner"]
+  A --> C["Full private detail<br/>available only to the<br/>owning provider"]
   B --> G["Many fingerprints batched<br/>into one small value"]
   G -.->|"public footprint stays tiny<br/>(not live yet)"| P["Anchored on Solana"]
-  C -->|"partner chooses to share"| T["Third party<br/>lender or auditor"]
+  C -->|"provider chooses to share"| T["Third party<br/>provider or auditor"]
   T --> V["Recomputes the fingerprint<br/>from the shared detail"]
   B --> V
   V --> OK["Match: the detail is exactly<br/>what Float committed to"]
