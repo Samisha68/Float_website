@@ -3,18 +3,11 @@ import { ChevronDown, Menu, X } from "lucide-react";
 
 const GITHUB_URL = "https://github.com/Samisha68/Float-Finance";
 const X_URL = "https://x.com/float_fi";
-// TODO: /providers has no page yet; build it (and add it to vite.config.ts + vercel.json) before launch.
-const getStarted: NavLink[] = [
-  { label: "For businesses", href: "/onboard" },
-  { label: "For providers", href: "/providers" },
-];
-
 type NavLink = { label: string; href: string; external?: boolean };
 
 const links: NavLink[] = [
   { label: "How it works", href: "#how-it-works" },
   { label: "Providers", href: "#providers" },
-  { label: "Onboard", href: "/onboard" },
 ];
 
 const resources: NavLink[] = [
@@ -25,7 +18,6 @@ const resources: NavLink[] = [
 
 const linkClass = "text-[0.8125rem] font-medium text-white/60 hover:text-white transition-colors";
 const itemClass = "block px-3 py-1.5 text-[0.8125rem] text-white/60 hover:text-white hover:bg-white/5 transition-all";
-const ctaClass = "px-4 py-1.5 text-[0.8125rem] font-semibold bg-white text-black hover:bg-white/90 transition-all";
 const externalProps = (link: NavLink) => (link.external ? { target: "_blank", rel: "noopener noreferrer" } : {});
 
 export default function Navbar() {
@@ -33,29 +25,25 @@ export default function Navbar() {
   const resourcesButton = useRef<HTMLButtonElement>(null);
   const resourcesPanel = useRef<HTMLDivElement>(null);
   const [resourcesOpen, setResourcesOpen] = useState(false);
-  const getStartedButton = useRef<HTMLButtonElement>(null);
-  const getStartedPanel = useRef<HTMLDivElement>(null);
-  const [getStartedOpen, setGetStartedOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Outside click and Escape close whichever menu is open.
   useEffect(() => {
-    if (!resourcesOpen && !getStartedOpen && !mobileOpen) return;
+    if (!resourcesOpen && !mobileOpen) return;
     const onPointerDown = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) { setResourcesOpen(false); setGetStartedOpen(false); setMobileOpen(false); }
+      if (!root.current?.contains(event.target as Node)) { setResourcesOpen(false); setMobileOpen(false); }
     };
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== "Escape") return;
       if (resourcesOpen) resourcesButton.current?.focus();
-      else if (getStartedOpen) getStartedButton.current?.focus();
       setResourcesOpen(false);
-      setGetStartedOpen(false);
+     
       setMobileOpen(false);
     };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
     return () => { document.removeEventListener("pointerdown", onPointerDown); document.removeEventListener("keydown", onKeyDown); };
-  }, [resourcesOpen, getStartedOpen, mobileOpen]);
+  }, [resourcesOpen, mobileOpen]);
 
   // On pages other than home, section anchors point back to the home page's sections.
   const resolve = (href: string) => (href.startsWith("#") && typeof location !== "undefined" && location.pathname !== "/" ? `/${href}` : href);
@@ -64,7 +52,7 @@ export default function Navbar() {
   // otherwise the browser's default hash behaviour applies.
   function follow(event: MouseEvent<HTMLAnchorElement>, href: string) {
     setResourcesOpen(false);
-    setGetStartedOpen(false);
+   
     setMobileOpen(false);
     if (!href.startsWith("#")) return;
     const target = document.getElementById(href.slice(1));
@@ -96,13 +84,6 @@ export default function Navbar() {
     requestAnimationFrame(() => menuItems()[0]?.focus());
   }
 
-  function onGetStartedKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key !== "ArrowDown") return;
-    event.preventDefault();
-    setGetStartedOpen(true);
-    requestAnimationFrame(() => menuItems(getStartedPanel)[0]?.focus());
-  }
-
   return (
     <div ref={root} className="fixed top-6 left-0 right-0 z-50 flex justify-center px-6 font-[family-name:var(--font-ui)]">
       <div className="relative w-full max-w-6xl">
@@ -123,7 +104,7 @@ export default function Navbar() {
                 aria-expanded={resourcesOpen}
                 aria-haspopup="true"
                 aria-controls="resources-menu"
-                onClick={() => { setResourcesOpen((open) => !open); setGetStartedOpen(false); }}
+                onClick={() => { setResourcesOpen((open) => !open); }}
                 onKeyDown={onResourcesKeyDown}
               >
                 Resources
@@ -146,36 +127,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          <div className="relative hidden md:block">
-            <button
-              ref={getStartedButton}
-              type="button"
-              className={`flex items-center gap-1 ${ctaClass}`}
-              aria-expanded={getStartedOpen}
-              aria-haspopup="true"
-              aria-controls="get-started-menu"
-              onClick={() => { setGetStartedOpen((open) => !open); setResourcesOpen(false); }}
-              onKeyDown={onGetStartedKeyDown}
-            >
-              Get Started
-              <ChevronDown className={`h-3 w-3 transition-transform ${getStartedOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-            </button>
-            {getStartedOpen && (
-              <div
-                id="get-started-menu"
-                ref={getStartedPanel}
-                role="menu"
-                aria-label="Get started"
-                className="absolute top-full right-0 mt-3 w-44 bg-black/90 backdrop-blur-xl border border-neutral-600 p-1.5 shadow-2xl z-50"
-                onKeyDown={(event) => onMenuKeyDown(event, getStartedPanel)}
-              >
-                {getStarted.map((link) => (
-                  <a key={link.label} role="menuitem" href={link.href} className={itemClass} onClick={(event) => follow(event, link.href)}>{link.label}</a>
-                ))}
-              </div>
-            )}
-          </div>
-
           <button
             type="button"
             className="md:hidden flex items-center justify-center h-8 w-8 -mr-2 text-white/60 hover:text-white transition-colors"
@@ -196,10 +147,6 @@ export default function Navbar() {
             <p className="px-3 pt-3 pb-1 text-[0.6875rem] font-medium uppercase tracking-wider text-white/40">Resources</p>
             {resources.map((link) => (
               <a key={link.label} href={link.href} className={itemClass} {...externalProps(link)} onClick={(event) => follow(event, link.href)}>{link.label}</a>
-            ))}
-            <p className="px-3 pt-3 pb-1 text-[0.6875rem] font-medium uppercase tracking-wider text-white/40">Get started</p>
-            {getStarted.map((link) => (
-              <a key={link.label} href={link.href} className={itemClass} onClick={(event) => follow(event, link.href)}>{link.label}</a>
             ))}
           </div>
         )}

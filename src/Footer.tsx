@@ -9,14 +9,9 @@ const X_URL = "https://x.com/float_fi";
 const columns: { title: string; links: { label: string; href: string }[] }[] = [
   { title: "Product", links: [
     { label: "Infrastructure", href: "/docs/architecture" },
-    { label: "FLOAT Score", href: "/docs/overview" },
     { label: "API", href: "/docs/api-reference" },
   ] },
   { title: "Developers", links: [{ label: "Documentation", href: "/docs" }] },
-  { title: "Onboarding", links: [
-    { label: "Service Provider", href: "/docs/get-started" },
-    { label: "Business", href: "/onboard" },
-  ] },
   { title: "Company", links: [
     { label: "About", href: "/docs/overview" },
     { label: "Contact", href: X_URL },
