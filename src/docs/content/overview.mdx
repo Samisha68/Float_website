@@ -5,85 +5,97 @@ section: Start here
 order: 2
 ---
 
-Float is a cross-platform credit infrastructure for service providers on Solana. It does three things:
+## What Float is
+
+Float is plug-and-play programmable credit for onchain services. A provider (an RPC, API, indexer or SaaS company) integrates once and decides which of its customers can borrow. Float sets the limit and manages the credit line. Repayment is collected through a capped, revocable on-chain delegation on Solana that auto-deducts as the business uses the service. Each repayment is verified on-chain and builds the **Float Score**, a portable reputation that follows the business to the next provider. Stripe turned payment data into credit. Float does the same for any provider.
+
+<Info>
+**Float Score.** The portable reputation of a business, built only from repayments that Float verifies on-chain. Nothing a provider reports about a repayment counts toward it. The score output is still being built: the reputation `band` is `null` today, and what you can read is the underlying verified evidence. See the [Roadmap](/roadmap).
+</Info>
 
 <CardGroup cols={3}>
-  <Card title="Underwrites receivables" icon="fa-solid fa-file-invoice-dollar">
-    You submit an invoice or a credit line. Float returns an assessment.
+  <Card title="Sets limits" icon="fa-solid fa-sliders">
+    Float scores the business and sends the provider a credit-limit attestation. The limit caps unsettled usage.
   </Card>
-  <Card title="Records obligations" icon="fa-solid fa-receipt">
-    After you finance, register the obligation. Repayments come from your reports or Float's chain observation.
+  <Card title="Tracks repayment" icon="fa-solid fa-receipt">
+    Usage and settlement events flow back to Float. Float watches the delegation on-chain.
   </Card>
-  <Card title="Builds reputation" icon="fa-solid fa-shield-halved">
-    Portable business reputation, from evidence Float verifies independently.
+  <Card title="Builds the Float Score" icon="fa-solid fa-shield-halved">
+    Verified on-chain repayments become a portable reputation, from evidence Float checks itself.
   </Card>
 </CardGroup>
 
 <Warning>
-Float is **not** a lender, pool, custodian or payment processor. It never disburses, holds, routes or moves funds. Your platform controls the capital and makes every financing decision.
+**Where funds move.** Funds move only through the capped, revocable delegation the business signs on Solana. The business can revoke it at any time. Float manages limits, repayment tracking and verification.
 </Warning>
+
+## Providers and businesses
+
+<CardGroup cols={2}>
+  <Card title="Providers" icon="fa-solid fa-server">
+    Integrate once. Choose which customers can borrow, serve them on credit, and report usage. The provider is paid through the delegation.
+  </Card>
+  <Card title="Businesses" icon="fa-solid fa-store">
+    Get credit they earn by paying on time. Each on-time repayment improves the Float Score and the terms offered by the next provider.
+  </Card>
+</CardGroup>
+
+## Provider, Float, business
 
 ```mermaid
 flowchart LR
-  B[Business] --> P[Partner platform]
-  P --> F[Float]
-  F --> U[Assessment]
-  U --> D[Partner decides & finances]
-  D -- "obligation + repayments" --> F
-  F --> V[Float-verified evidence]
-  V --> R[(Portable reputation)]
+  F["Float<br/>sets limits and tracks repayment"]
+  SP["Provider<br/>RPC, API, indexer, SaaS"]
+  B["Business"]
+  subgraph SOL["Solana · funds move only through the capped, revocable delegation the business signs"]
+    D["Auto-deducted delegation<br/>Subscriptions & Allowances"]
+  end
+  F -->|"1 · credit-limit attestation"| SP
+  SP -->|"2 · serves usage on credit"| B
+  B -->|"3 · usage settles"| D
+  D -->|"3 · settlement pulled"| SP
+  SP -.->|"4 · usage + settlement events"| F
+  D -.->|"4 · observed on-chain"| F
 ```
 
-## Two products, one platform
+## The journey
 
-| | Invoice financing | API/RPC credit lines |
-|---|---|---|
-| You submit | A receivable | A credit-line request |
-| After underwriting | Register an obligation | Open a credit facility with usage and settlements |
+<Steps>
+  <Step title="Integrate once">
+    The provider connects to Float with an API key and registers the businesses it serves. If another provider has already linked the same wallet, the business is linked to the same record. That wallet proof is the only way two providers share an identity.
+  </Step>
+  <Step title="Choose who can borrow">
+    The provider decides which businesses are offered a credit line. Float does not choose for the provider.
+  </Step>
+  <Step title="Set a limit">
+    The provider submits a credit-line request. Underwriting is asynchronous: you get an immediate acknowledgement and the result follows. Float returns an assessment with a risk band, confidence and reason codes, and opens a credit facility with an approved limit, the connected provider and a reset cadence.
+  </Step>
+  <Step title="Business approves a capped delegation">
+    The business signs an on-chain delegation that caps what can be pulled and that it can revoke at any time.
+  </Step>
+  <Step title="Usage and repayment auto-deduct">
+    The provider serves usage on credit. Settlement is pulled automatically through the delegation, up to its cap.
+  </Step>
+  <Step title="Float verifies on-chain">
+    Float observes each settlement, and each failed pull, on Solana. Only what Float observes itself counts as verified.
+  </Step>
+  <Step title="The Float Score updates">
+    Verified outcomes update the business's reputation, which the next provider can read with the business's consent. It never exposes amounts or providers. The score output is still being built.
+  </Step>
+</Steps>
 
-Both share the same businesses, consent, underwriting lifecycle and reputation.
-
-## Partner-reported vs Float-verified
+## Provider-reported vs Float-verified
 
 <CardGroup cols={2}>
-  <Card title="Partner-reported" icon="fa-solid fa-pen-to-square">
-    Everything you send about an obligation. Drives **your** bookkeeping. Never affects reputation.
+  <Card title="Provider-reported" icon="fa-solid fa-pen-to-square">
+    Everything a provider sends about usage or repayment. Drives **the provider's** bookkeeping. Never affects the Float Score.
   </Card>
   <Card title="Float-verified" icon="fa-solid fa-circle-check">
-    What Float observes itself, on-chain. The **only** input to portable reputation.
+    What Float observes itself, on-chain. The **only** input to the Float Score.
   </Card>
 </CardGroup>
 
 See [Architecture](/architecture) for the full rule.
-
-## The partner journey
-
-<Steps>
-  <Step title="Create or link the business">
-    Register the business you serve. If another partner has already verified the same wallet, you're linked to the same business. That is the only way two partners share an identity.
-  </Step>
-  <Step title="Record consent (optional)">
-    Without the business's consent, reputation can't be read.
-  </Step>
-  <Step title="Submit for underwriting">
-    Underwriting is asynchronous. You get an immediate acknowledgement and the result follows.
-  </Step>
-  <Step title="Answer information requests">
-    If more is needed, provide the data or documents requested and the request resumes.
-  </Step>
-  <Step title="Read the assessment">
-    You get a risk band, confidence, verification levels and reason codes. **No** approve/decline and no price. That decision is yours.
-  </Step>
-  <Step title="Finance, then register the obligation">
-    Pay on your own rails, then register the obligation. Float gives you a repayment reference for the payer to include in the repayment transaction.
-  </Step>
-  <Step title="Report repayments or a default">
-    These update **your** bookkeeping. Float verifies on-chain only where chain observation is enabled.
-  </Step>
-  <Step title="Read portable reputation">
-    A summary of Float-verified outcomes. Never amounts, partners or invoices.
-  </Step>
-</Steps>
 
 ## Environments and access
 
@@ -96,13 +108,12 @@ Your API key decides the environment, and test and live data never mix.
 | | Test keys (`fk_test_…`) | Live keys (`fk_live_…`) |
 |---|---|---|
 | Underwriting | Sandbox. Mock results, not real assessments | Not available. Requests return `503` |
-| KYB | Sandbox. Mock results | Not available. Requests return `503` |
 | Chain observation | Solana devnet | Not enabled |
 | Document uploads | Not available yet (`503`) | Not available yet (`503`) |
 
-Float never moves funds in either environment. See the [Roadmap](/roadmap) for the full list of what is real, and the [sandbox outcomes](/get-started#sandbox) you can trigger with a test key.
+See the [Roadmap](/roadmap) for the full list of what is real, and the [sandbox note](/get-started#sandbox) for testing with a test key.
 
-**Getting credentials.** There is no self-serve signup yet. To get partner credentials today, contact the Float team directly.
+**Getting credentials.** There is no self-serve signup yet. To get provider credentials today, contact the Float team directly.
 
 ## Integration at a glance
 
@@ -114,7 +125,7 @@ Float never moves funds in either environment. See the [Roadmap](/roadmap) for t
     Send an idempotency key on create requests so retries never duplicate. Replaying a key with the same body returns the original result; reusing it with a different body is rejected.
   </Accordion>
   <Accordion title="Events">
-    Partners can poll an ordered event feed or receive signed webhooks carrying the same events.
+    Providers can poll an ordered event feed or receive signed webhooks carrying the same events.
   </Accordion>
   <Accordion title="Money and IDs">
     Money is an integer in minor units, sent as a string with a currency. IDs are prefixed (`biz_`, `uwr_`, `obl_`) and stable forever.
