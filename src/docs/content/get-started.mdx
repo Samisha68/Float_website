@@ -1,207 +1,141 @@
 ---
 title: Get started
-subtitle: From a test key to your first Float assessment in four calls
+subtitle: 
 section: Start here
 order: 1
 ---
 
 <div className="float-hero">
-  <h2>Credit infrastructure that <span className="float-gradient-text">proves itself</span>.</h2>
+  <h2>Programmable credit infrastructure <span className="float-gradient-text">that proves itself</span>.</h2>
   <p>
-    Float underwrites receivables, records the obligations you finance, and turns on-chain
-    repayments into portable business reputation. You keep the capital and every decision.
+    Float manages the whole credit lifecycle for service providers. It works out which customers
+    are eligible, extends the credit, collects repayments, and turns on-chain repayments into
+    portable reputation. The provider keeps running its service.
   </p>
   <div className="float-hero__actions">
-    <a className="float-btn float-btn--primary" href="#quickstart">Run the quickstart →</a>
-    <a className="float-btn" href="/overview">How Float works</a>
-    <a className="float-btn" href="/overview#environments-and-access">Environments and access</a>
+    <a className="float-btn float-btn--primary" href="/overview">How Float works →</a>
+    <a className="float-btn" href="/overview#availability-and-access">Availability and access</a>
+    <a className="float-btn" href="/roadmap">Roadmap</a>
   </div>
 </div>
 
 ## What Float gives you
 
 <CardGroup cols={3}>
-  <Card title="Underwriting" icon="fa-solid fa-file-invoice-dollar" href="/overview#the-partner-journey">
-    Submit an invoice or credit line, get back a risk band, confidence and reason codes.
+  <Card title="Assessment" icon="fa-solid fa-file-invoice-dollar" href="/overview#two-layers-of-eligibility">
+    Float detects which of a provider's customers are eligible for credit, and sets their limits automatically.
   </Card>
-  <Card title="Obligations" icon="fa-solid fa-link" href="/overview#partner-reported-vs-float-verified">
-    Register what you financed. Float binds on-chain repayments to it.
+  <Card title="Funds and repayment" icon="fa-solid fa-hand-holding-dollar" href="/overview#the-partner-journey">
+    Float manages the whole credit line, providers just plug Float in.
   </Card>
   <Card title="Reputation" icon="fa-solid fa-shield-halved" href="/architecture#partner-reported-state-vs-float-verified-evidence">
-    Portable, consent-gated, built only from evidence Float verifies.
+    Portable reputation built and extended from repayments Float verifies.
   </Card>
 </CardGroup>
 
-<Warning>
-Float is **not** a lender, pool, custodian or payment processor. It never holds or moves funds.
-</Warning>
+<Note>
+Float's funding model will be published before launch.
+</Note>
 
 ## Explore by product
 
 <Tabs>
-  <Tab title="Invoice financing">
-    The default flow (`kind: invoice`). You submit a receivable, Float returns an assessment, you decide and finance.
-
-    | Step | Call | You get |
-    |---|---|---|
-    | 1 | `POST /v1/businesses` | `biz_…`, created or linked |
-    | 2 | `POST /v1/underwriting_requests` | `uwr_…` with status `pending` |
-    | 3 | `GET /v1/underwriting_requests/{id}` | An assessment once `completed` |
-    | 4 | `POST /v1/obligations` | `obl_…` plus a `repayment_reference` |
-
-    <Tip>There is no approve/decline field and no price in an assessment. That decision is yours.</Tip>
-  </Tab>
   <Tab title="Credit lines">
-    API/RPC credit lines use `kind: credit_line` on the **same** underwriting and reputation engine.
+    Float gives a service provider's customers ongoing credit to use its API or RPC service, based on whether they are eligible.
 
-    | Shared with invoices | Specific to credit lines |
-    |---|---|
-    | Businesses and consent | Float-wide ceilings with fixed per-provider shares |
-    | Underwriting lifecycle | Credit facilities, usage, live limit, settlements |
-    | Events and webhooks | Solana Subscriptions & Allowances delegations |
-    | Reputation engine | `chain_observed_credit` outcome policy |
+    <CardGroup cols={2}>
+      <Card title="Eligibility first" icon="fa-solid fa-user-check">
+        Eligibility starts from past subscription records. Once a user accepts the terms, Float can reassess through service usage.
+      </Card>
+      <Card title="Automatic limits" icon="fa-solid fa-gauge">
+        Limits are set automatically by Float's programmable credit logic, based on each customer's history. Providers can also set stricter limits.
+      </Card>
+      <Card title="Float extends the credit" icon="fa-solid fa-hand-holding-dollar">
+        Float provides the funds. The customer uses the credit for the provider's service, and the provider is paid as normal.
+      </Card>
+      <Card title="Repay Float" icon="fa-solid fa-rotate">
+        Customers repay through Float. Repayments are settled automatically through a Solana delegation the customer controls.
+      </Card>
+    </CardGroup>
 
-    <Note>The credit-line flow is still a proof of concept. See [Proof of concept](/proof-of-concept).</Note>
+  </Tab>
+  <Tab title="Invoice financing">
+    With invoice financing, Float pays the provider's invoice, and the customer repays Float over time.
+
+    <CardGroup cols={2}>
+      <Card title="Connect once" icon="fa-solid fa-plug">
+        The provider connects to Float once. Its business doesn't need to be created in Float first.
+      </Card>
+      <Card title="See who is eligible" icon="fa-solid fa-user-check">
+        The provider uses its Float keys to see how many of its customers are likely eligible, and why.
+      </Card>
+      <Card title="Set stricter rules" icon="fa-solid fa-sliders">
+        Providers can tighten Float's baseline and decide which plans can be financed. They can't loosen it.
+      </Card>
+      <Card title="Manage from a dashboard" icon="fa-solid fa-table-columns">
+        Eligibility, rules and plans are managed in a dashboard.
+      </Card>
+    </CardGroup>
+
+    <Tip>Float funds the invoice and collects the repayments, so the provider takes no credit risk.</Tip>
   </Tab>
   <Tab title="Reputation">
-    Reputation is a **read** over Float-verified outcomes. It never includes amounts, partners or invoices.
+    Reputation is for a service provider's **own customers**. It is a summary of their repayment outcomes, verified by Float on-chain. It never includes amounts, partners or invoices.
 
     <CardGroup cols={2}>
       <Card title="Consent first" icon="fa-solid fa-user-check">
-        Record it with `PUT /v1/businesses/{id}/consent`. Without it, reads return `403`.
+        A customer's reputation can only be read with their consent.
       </Card>
       <Card title="Verified only" icon="fa-solid fa-circle-check">
-        Partner reports never count. Only chain observations Float makes itself.
+        Subscription and usage data feed assessment only. Reputation comes only from repayments Float observes itself.
       </Card>
     </CardGroup>
   </Tab>
 </Tabs>
 
-## Quickstart
+## Where Float is today
 
-<Steps>
-  <Step title="Grab a test key">
-    Test keys start with `fk_test_` and only ever touch test data. There is no self-serve signup yet, so see [Environments and access](/overview#environments-and-access) for how to get one.
+Float is pre-launch. Each part of the platform is at one of these stages.
 
-    ```bash
-    export FLOAT_API_KEY=fk_test_…
-    ```
-  </Step>
-  <Step title="Create a business">
-    <CodeBlocks>
-    ```bash cURL
-    curl -X POST https://api.float.xyz/v1/businesses \
-      -H "Authorization: Bearer $FLOAT_API_KEY" \
-      -H "Content-Type: application/json" \
-      -H "Idempotency-Key: $(uuidgen)" \
-      -d '{"external_id":"acct_8842","display_name":"Lagos Freight Ltd","country":"NG"}'
-    ```
+<CardGroup cols={3}>
+  <Card title="Available now" icon="fa-solid fa-circle-check">
+    Core foundations are built: businesses, consent, assessments, invoices, repayments and reputation.
+  </Card>
+  <Card title="In the works" icon="fa-solid fa-hammer">
+    Credit eligibility checks, on-chain anchoring of assessments and a published API reference.
+  </Card>
+  <Card title="Roadmap" icon="fa-solid fa-map" href="/roadmap">
+    The full picture of what is available, in progress and under review.
+  </Card>
+</CardGroup>
 
-    ```typescript TypeScript
-    const res = await fetch("https://api.float.xyz/v1/businesses", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.FLOAT_API_KEY}`,
-        "Content-Type": "application/json",
-        "Idempotency-Key": crypto.randomUUID(),
-      },
-      body: JSON.stringify({ external_id: "acct_8842", display_name: "Lagos Freight Ltd", country: "NG" }),
-    });
-    const { data: business } = await res.json(); // business.id → "biz_01J…"
-    ```
-
-    ```python Python
-    import os, uuid, requests
-
-    res = requests.post(
-        "https://api.float.xyz/v1/businesses",
-        headers={
-            "Authorization": f"Bearer {os.environ['FLOAT_API_KEY']}",
-            "Idempotency-Key": str(uuid.uuid4()),
-        },
-        json={"external_id": "acct_8842", "display_name": "Lagos Freight Ltd", "country": "NG"},
-    )
-    business = res.json()["data"]  # business["id"] → "biz_01J…"
-    ```
-    </CodeBlocks>
-  </Step>
-  <Step title="Submit an invoice">
-    Underwriting is asynchronous: you get `202` and status `pending`.
-
-    ```bash
-    curl -X POST https://api.float.xyz/v1/underwriting_requests \
-      -H "Authorization: Bearer $FLOAT_API_KEY" \
-      -H "Content-Type: application/json" \
-      -H "Idempotency-Key: $(uuidgen)" \
-      -d '{
-        "business": "biz_01J…",
-        "invoice": {
-          "invoice_number": "INV-2026-0091",
-          "amount": { "amount": "4500000", "currency": "USD" },
-          "issue_date": "2026-09-01",
-          "due_date": "2026-11-30",
-          "debtor": { "name": "Acme Retail Plc", "country": "NG" }
-        }
-      }'
-    ```
-  </Step>
-  <Step title="Read the assessment">
-    Poll the request, or follow `GET /v1/events`. A completed request embeds the assessment.
-
-    ```json
-    "assessment": {
-      "band": { "key": "moderate_risk", "label": "Moderate risk", "ordinal": 2, "of": 3 },
-      "confidence": { "level": "medium" },
-      "verification": { "invoice": "verified", "debtor": "partially_verified", "business": "unverified" },
-      "reasons": [{ "code": "DEBTOR_PAYMENT_HISTORY_LIMITED", "direction": "negative" }]
-    }
-    ```
-  </Step>
-</Steps>
-
-## Sandbox
-
-With a `fk_test_` key, an invoice-number suffix picks the outcome. Try `INV-0091-SBX-REJECT`.
-
-| Suffix | Outcome |
-|---|---|
-| *(none)* | `completed`, band `moderate_risk` |
-| `-SBX-BAND-<key>` | `completed` with that band (`low_risk`, `high_risk`, …) |
-| `-SBX-REJECT` | `rejected` |
-| `-SBX-INFO` | `requires_information`; any information push completes it |
-| `-SBX-FAIL` | `failed` |
-| `-SBX-SILENT` | stays `processing` until the SLA timeout |
-| `-SBX-UNAVAILABLE` | retried, then `failed` / `underwriting_dispatch_failed` |
-
-<Info>Sandbox assessments carry `engine.name: "float-sandbox"` and a `SANDBOX_RESULT` reason. They are not real assessments.</Info>
-
-## Explore by role
+## Explore by interest
 
 <Tabs>
-  <Tab title="Platform engineer">
+  <Tab title="Service providers">
     <CardGroup cols={2}>
-      <Card title="Integration at a glance" icon="fa-solid fa-plug" href="/overview#integration-at-a-glance">
-        Auth, idempotency, money and IDs.
+      <Card title="How Float works" icon="fa-solid fa-route" href="/overview#the-partner-journey">
+        The journey from onboarding a business to reading its reputation.
       </Card>
-      <Card title="API Reference (coming soon)" icon="fa-solid fa-code" href="/api-reference">
-        The full endpoint reference, once the API is finalized.
+      <Card title="Proof of concept" icon="fa-solid fa-handshake" href="/proof-of-concept">
+        How an API or RPC credit line works from start to finish.
       </Card>
     </CardGroup>
   </Tab>
-  <Tab title="Risk & ops">
+  <Tab title="Risk & compliance">
     <CardGroup cols={2}>
       <Card title="Reported vs verified" icon="fa-solid fa-scale-balanced" href="/architecture#partner-reported-state-vs-float-verified-evidence">
         What counts toward reputation, and what never does.
       </Card>
-      <Card title="What's live" icon="fa-solid fa-signal" href="/roadmap">
-        Real today vs still an interface.
+      <Card title="Roadmap" icon="fa-solid fa-signal" href="/roadmap">
+        What is available today and what is coming next.
       </Card>
     </CardGroup>
   </Tab>
-  <Tab title="Architect">
+  <Tab title="Technical readers">
     <CardGroup cols={2}>
       <Card title="Architecture" icon="fa-solid fa-diagram-project" href="/architecture">
-        The principles Float is built on, and verifiable assessments.
+        The principles Float is built on, and how assessments can be verified.
       </Card>
       <Card title="Decision log" icon="fa-solid fa-book" href="/decision-log">
         The decisions that shape the design.

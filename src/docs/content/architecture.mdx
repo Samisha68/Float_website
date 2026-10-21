@@ -8,17 +8,17 @@ order: 3
 ## Design principles
 
 <CardGroup cols={2}>
-  <Card title="Non-custodial" icon="fa-solid fa-hand">
-    Float never holds, routes or moves funds. Partners control the capital and make every financing decision. Float records and verifies.
+  <Card title="Float manages the credit" icon="fa-solid fa-hand-holding-dollar">
+    Float assesses, funds and collects. The infrastructure provider keeps running its service and takes no credit risk. Float's funding model will be published before launch.
   </Card>
   <Card title="Verified evidence only" icon="fa-solid fa-circle-check">
-    Portable reputation is built only from outcomes Float verifies itself, never from what a partner reports.
+    Portable reputation is built only from repayment outcomes that Float's chain observer verifies on-chain, never from data an infrastructure provider reports.
   </Card>
-  <Card title="Partner-scoped data" icon="fa-solid fa-lock">
-    A partner sees its own data. The one deliberate exception is reputation, which is shared across partners with the business's consent.
+  <Card title="Provider-scoped data" icon="fa-solid fa-lock">
+    An infrastructure provider sees its own data, and only aggregate eligibility counts for its users. Individual assessments happen only after a user opts in by connecting its wallet and signing a message. The one deliberate exception is reputation, which is shared across providers with the user's consent.
   </Card>
   <Card title="Isolated environments" icon="fa-solid fa-flask">
-    Test and live are fully separate. Test data never mixes with live data.
+    Devnet and mainnet are fully separate. Devnet data never mixes with mainnet data.
   </Card>
 </CardGroup>
 
@@ -26,41 +26,41 @@ order: 3
 
 The most important rule in Float.
 
-| | Partner-reported state | Float-verified evidence |
+| | Provider-reported data | Float-verified evidence |
 |---|---|---|
-| **Source** | Reports a partner sends to Float | Float's own on-chain observation |
-| **Used for** | The partner's bookkeeping | Portable reputation |
+| **Source** | Subscription records and usage data an infrastructure provider shares with Float | User repayments, seen on-chain by Float's chain observer |
+| **Used for** | Assessment: eligibility and limits | Portable reputation |
 | **Affects reputation?** | ❌ **Never** | ✅ **Yes, the only input** |
 
 <CardGroup cols={3}>
-  <Card title="Reports stay reports" icon="fa-solid fa-eye-slash">
-    A repayment you report never looks chain-verified.
+  <Card title="Shared data stays shared data" icon="fa-solid fa-eye-slash">
+    Subscription and usage records help Float assess a user. They never become reputation evidence.
   </Card>
-  <Card title="Defaults are bookkeeping" icon="fa-solid fa-book">
-    A default you declare updates your records. It creates no reputation evidence.
+  <Card title="Repayments come to Float" icon="fa-solid fa-book">
+    Because users repay Float on-chain in USDC, Float's chain observer sees repayments directly rather than relying on anyone's report.
   </Card>
   <Card title="Enforced by the data layer" icon="fa-solid fa-database">
-    The rule is enforced at the database level, so it holds even if application code is wrong.
+    The rule is built into how the data is stored, so it holds no matter how the rest of the system behaves.
   </Card>
 </CardGroup>
 
 <Note>
-Float-verified evidence only exists where on-chain observation is enabled. Where it is off, repayments are marked as not verifiable and reputation stays empty. See the [Roadmap](/roadmap) for what is enabled today.
+Float still records every repayment it collects. But a repayment counts as Float-verified reputation evidence only when Float's chain observer sees it on-chain. Where observation is off, repayments are marked as not verifiable and reputation stays empty. See the [Roadmap](/roadmap) for what is available today.
 </Note>
 
 ## Verifiable assessments
 
-Float can prove it issued a specific assessment, the exact outcome and terms, without putting any private business or invoice data anywhere public.
+Float can prove it issued a specific assessment, the exact outcome and terms, without putting any private user or invoice data anywhere public.
 
-Only a small cryptographic **fingerprint** of the assessment's public-safe facts ever becomes public. The private detail stays with the partner that owns the assessment, who can show it selectively to whoever they choose, such as a lender or an auditor. That party can then check the detail they were shown against the fingerprint, **without taking Float's word for it**.
+Only a small cryptographic **fingerprint** of the assessment's public-safe facts ever becomes public. The private detail stays with Float and the owning infrastructure provider. With the user's consent, it can be shared selectively with a third party, such as an auditor or another infrastructure provider. {/* TODO: confirm who owns private assessment detail */} That party can then check the detail they were shown against the fingerprint, **without taking Float's word for it**.
 
 ```mermaid
 flowchart TB
   A["Assessment created"] --> B["Fingerprint of the<br/>public-safe facts<br/>generated and stored"]
-  A --> C["Full private detail<br/>available only to the<br/>owning partner"]
+  A --> C["Full private detail<br/>available only to Float and<br/>the owning provider"]
   B --> G["Many fingerprints batched<br/>into one small value"]
-  G -.->|"public footprint stays tiny<br/>(not live yet)"| P["Anchored on Solana"]
-  C -->|"partner chooses to share"| T["Third party<br/>lender or auditor"]
+  G -.->|"public footprint stays tiny<br/>(coming soon)"| P["Anchored on Solana"]
+  C -->|"shared with the<br/>user's consent"| T["Third party<br/>auditor or another provider"]
   T --> V["Recomputes the fingerprint<br/>from the shared detail"]
   B --> V
   V --> OK["Match: the detail is exactly<br/>what Float committed to"]
@@ -86,7 +86,7 @@ stateDiagram-v2
 ```
 
 <Warning>
-**Anchoring is not live yet.** Fingerprints, batching, proofs and checking shared detail against a fingerprint already work. The on-chain step is still being built, so every attestation currently stays at **Pending**. Revocation is part of the design but isn't wired up yet either.
+**On-chain anchoring is coming soon.** Fingerprints, batching, proofs and checking shared detail against a fingerprint are already in place. The on-chain step is still in the works, so every attestation currently stays at **Pending**. Revocation is part of the design and is coming soon too.
 </Warning>
 
 <CardGroup cols={2}>
@@ -94,6 +94,6 @@ stateDiagram-v2
     The decisions that matter most, and why.
   </Card>
   <Card title="Roadmap" icon="fa-solid fa-map" href="/roadmap">
-    What's real and what's still being built.
+    What is available now and what is coming next.
   </Card>
 </CardGroup>

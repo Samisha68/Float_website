@@ -1,6 +1,6 @@
 ---
 title: Decision log
-subtitle: The decisions that shape Float, and why
+subtitle:
 section: Concepts
 order: 5
 ---
@@ -9,13 +9,36 @@ The handful of decisions most relevant if you're evaluating Float.
 
 | Decision | Why |
 |---|---|
-| **Float is non-custodial.** It never disburses, holds or moves funds, and obligations are registered after a partner has financed. | Fewer moving parts, and no custody or lending risk sits with Float. |
-| **Reputation uses Float-verified evidence only.** | Portable reputation has to be independently checkable, and it applies equally to good and bad outcomes. |
-| **A wallet proof is the only cross-partner identity link.** | Hard to spoof, and no merging of business records to get wrong. |
-| **Private and public data are kept apart.** Only fingerprints are ever public. | Partners and their customers keep control of what is shared, and with whom. |
-| **Credit lines share the invoice engine.** They are a second kind of request on the same underwriting and reputation system. | One set of businesses, consent rules, events and reputation, not two. |
-| **Chain observation is enabled per environment.** | Nothing silently depends on a network connection. |
+| **Float manages assessment, funds and repayment.** Float assesses eligibility, extends the credit, pays the infrastructure provider for usage on credit and collects repayments. The provider takes no credit risk. | One party manages the whole credit lifecycle, so providers can offer credit without lending their own capital or chasing repayments. Float's funding model will be published before launch. |
+| **Businesses repay Float on-chain in USDC.** Repayments settle through an SPL token delegation the business controls. | Settlement is automatic, the business keeps control and can see every pull, and Float can verify every repayment on-chain itself. |
+| **Eligibility is checked in two layers.** Layer 1 uses subscription records in aggregate. Layer 2 reviews a business's individual usage, only after it opts in. | Providers can see likely eligibility from data they already keep, without sharing anything identifying. Detailed usage is reviewed only with the business's consent. |
+| **Businesses opt in by connecting a wallet and signing a message.** | Consent is recorded in a form that is hard to spoof, and the business is linked to the wallet Float observes repayments from. |
+| **Providers can tighten eligibility rules but not loosen them.** This includes choosing what counts as a qualifying subscription, such as whether renewals count. | Float's baseline protects every credit facility consistently, while providers can still be more selective with their own users. |
+| **Every query is scoped to one provider.** | One provider can never see another's data. The only deliberate exception is reputation, shared across providers with the business's consent. |
+| **Usage data is shared as daily aggregates only.** | Float needs patterns, not payloads. Request contents and end-user IP addresses are never shared. |
+| **Providers choose how credit offers appear.** A Float-hosted page, embedded components styled to the provider's brand, or a custom build on the API. | Providers can launch quickly with Float's UI or keep full control of their own experience, while Float runs the credit itself in every case. |
+| **Reputation uses Float-verified evidence only.** | Portable reputation has to be independently checkable, and that applies equally to good and bad outcomes. Subscription and usage data feed assessment only, never reputation. |
+| **A wallet proof is the only link between providers.** | It is hard to spoof, and there are no merged business records to get wrong. |
+| **Private and public data are kept apart.** Only fingerprints are ever public. | Providers and the businesses they serve stay in control of what is shared, and with whom. |
+| **Credit lines and invoice financing share one platform.** They are two kinds of request on the same assessment and reputation system. | One set of businesses, consent rules, events and reputation, not two. |
+| **On-chain observation is switched on per environment.** | Nothing silently depends on a network connection. |
+
+## Superseded decisions
+
+Earlier decisions kept for the record. They no longer describe how Float works.
+
+| Decision | Why it was made | Superseded by |
+|---|---|---|
+| **Float is non-custodial.** It never disburses, holds or moves funds, and obligations are recorded only after a provider has financed. | Fewer moving parts, and no custody or lending risk sat with Float. | **Float manages assessment, funds and repayment.** |
 
 ## Open decisions
 
-Still being decided, and not assumed anywhere in the product: production document retention, the final risk band taxonomy, and how reputation is banded. See the [Roadmap](/roadmap).
+Still being decided, and not assumed anywhere in the product:
+
+- Who owns the private detail of an assessment
+- Eligibility thresholds for Layer 1 and Layer 2
+- Production document retention
+- The final risk band taxonomy
+- How reputation is banded
+
+See our [Roadmap](/roadmap).

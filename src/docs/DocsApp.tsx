@@ -116,9 +116,9 @@ function Footer() {
         <div className="float-footer__brand">
           <DocLink href="/docs" className="float-footer__logo" aria-label="Float home"><Logo height={24} /></DocLink>
           <p className="float-footer__tagline">
-            Cross-platform credit infrastructure for Solana. Underwriting, obligations and portable reputation built on evidence Float verifies itself.
+            Cross-platform credit infrastructure for Solana. Assessment, funds, repayment and portable reputation built on evidence Float verifies itself.
           </p>
-          <span className="float-footer__pill"><span className="float-footer__dot" /> Sandbox live · Built on Solana</span>
+          <span className="float-footer__pill"><span className="float-footer__dot" /> Pre-launch · Built on Solana</span>
         </div>
         <nav className="float-footer__cols" aria-label="Footer">
           <div className="float-footer__col">
@@ -126,7 +126,7 @@ function Footer() {
             <ul>
               <li><DocLink href="/get-started">Get started</DocLink></li>
               <li><DocLink href="/overview">Overview</DocLink></li>
-              <li><DocLink href="/get-started#sandbox">Sandbox outcomes</DocLink></li>
+              <li><DocLink href="/overview#availability-and-access">Availability and access</DocLink></li>
             </ul>
           </div>
           <div className="float-footer__col">
@@ -138,10 +138,10 @@ function Footer() {
             </ul>
           </div>
           <div className="float-footer__col">
-            <h4>Build</h4>
+            <h4>Resources</h4>
             <ul>
               <li><DocLink href="/api-reference">API Reference</DocLink></li>
-              <li><DocLink href="/overview#events">Events</DocLink></li>
+              <li><DocLink href="/proof-of-concept">Proof of concept</DocLink></li>
               <li><DocLink href={GITHUB_URL}>GitHub</DocLink></li>
             </ul>
           </div>
@@ -149,7 +149,7 @@ function Footer() {
       </div>
       <div className="float-footer__bar">
         <span>© 2026 Float Finance</span>
-        <span>Float never holds, routes or moves funds.</span>
+        <span>Float manages assessment, funds and repayment.</span>
       </div>
     </footer>
   );
