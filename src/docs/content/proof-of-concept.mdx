@@ -67,7 +67,7 @@ Limit and rate move together as a function of settlement history. Each clean cyc
 flowchart LR
   A["Credit extended<br/>at current terms"] --> B["Usage &<br/>settlement"]
   B --> C["Verified on-chain"]
-  C --> D["Reputation updates"]
+  C --> D["Float Score updates"]
   D --> E["Terms reassessed"]
   E --> A
 ```
@@ -79,7 +79,7 @@ flowchart LR
 | After two clean cycles | $3,500 | 2.2% | +$1,000 (+40%) |
 
 <Note>
-These numbers are **illustrative**. Today's first version of credit reputation counts only settled periods and failed settlement pulls, observed on-chain. See the [Roadmap](/roadmap) for what the next version still has to decide.
+These numbers are **illustrative**. Today's first version of credit reputation counts only settled periods and failed settlement pulls, observed on-chain. The Float Score output is still being built. See the [Roadmap](/roadmap) for what the next version still has to decide.
 </Note>
 
 ## Assessment
