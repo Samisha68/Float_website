@@ -5,7 +5,7 @@ const appId = import.meta.env.VITE_PRIVY_APP_ID;
 
 export default function Waitlist({ payload, onClose }: { payload: Payload; onClose: () => void }) {
   if (!appId) return <div className="auth-error" role="alert">Sign-in is being set up. Please check back shortly.<br /><button className="text-link" onClick={onClose}>Dismiss</button></div>;
-  return <PrivyProvider appId={appId} config={{ loginMethods: ["email", "google"], appearance: { theme: "dark", accentColor: "#d8d2c9", logo: "/float-favicon.svg", landingHeader: "Your next chapter starts here", loginMessage: "Sign in to save your place on the Float waitlist. You agree to be contacted by Float about early access." }, embeddedWallets: { ethereum: { createOnLogin: "off" }, solana: { createOnLogin: "off" } } }}>
+  return <PrivyProvider appId={appId} config={{ loginMethods: ["email", "google"], appearance: { theme: "light", accentColor: "#0a0a0a", logo: "/logo.svg", landingHeader: "Your next chapter starts here", loginMessage: "Sign in to save your place on the Float waitlist. You agree to be contacted by Float about early access." }, embeddedWallets: { ethereum: { createOnLogin: "off" }, solana: { createOnLogin: "off" } } }}>
     <Saver payload={payload} onClose={onClose} />
   </PrivyProvider>;
 }

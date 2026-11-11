@@ -1,89 +1,93 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 const Waitlist = lazy(() => import("./Waitlist"));
-const VIDEO_URL = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260808_112712_da9d53df-6d27-4b12-bdf6-aa9dc2622bdf.mp4";
 
 export type Payload = { business: string; community: boolean; socials: string };
 
-const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
-const step = (a: number, b: number, x: number) => { const t = clamp((x - a) / (b - a || 1e-6), 0, 1); return t * t * (3 - 2 * t); };
+const DOCS_URL = "https://float-finance.docs.buildwithfern.com";
+const X_URL = "https://x.com/float_fi";
+
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* Sample product cards. Illustration only: every name, address and number is made up. */
+
+function ReputationCard() {
+  return <div className="card rep-card">
+    <div className="rep-head">
+      <div><p className="eyebrow">Credit reputation</p><h3 className="rep-name">Business XYZ <Verified /></h3></div>
+      <span className="badge badge-dot">Connected</span>
+    </div>
+    <div className="rep-score">
+      <p className="rep-score-value num">82<span>/100</span></p>
+      <div className="rep-score-meta"><p className="eyebrow">Float score</p><p>Strong reputation</p></div>
+    </div>
+    <div className="meter" aria-hidden="true"><span style={{ width: "82%" }} /></div>
+    <dl className="rep-rows">
+      <div><dt>On-time repayments</dt><dd className="num">96%</dd></div>
+      <div><dt>Credit limit</dt><dd className="num">$2,500</dd></div>
+      <div><dt>Next settlement</dt><dd className="num">Dec 1, 2026</dd></div>
+    </dl>
+    <p className="rep-foot"><span className="mono">7xKX…9F2A</span><img src="/logo.svg" alt="" /></p>
+  </div>;
+}
+
+const EVENTS = [
+  { label: "Provider paid upfront", value: "$12.40" },
+  { label: "Repayment settled on time", value: "$102.50" },
+  { label: "Limit raised", value: "$1,000 → $2,500" },
+  { label: "Usage on credit", value: "$31.80" },
+];
+
+function LiveChip() {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (reduceMotion()) return;
+    const id = window.setInterval(() => setI((n) => (n + 1) % EVENTS.length), 2600);
+    return () => clearInterval(id);
+  }, []);
+  const e = EVENTS[i];
+  return <div className="card chip" aria-hidden="true">
+    <span className="chip-dot" />
+    <div key={i} className="chip-body"><p>{e.label}</p><p className="num">{e.value}</p></div>
+    <span className="eyebrow">Solana</span>
+  </div>;
+}
+
+function ProviderCard() {
+  const rows = [
+    { name: "Northwind Labs", used: 1840, limit: 5000, status: "Active" },
+    { name: "Helios Data", used: 850, limit: 2500, status: "Active" },
+    { name: "Quill Agents", used: 600, limit: 2500, status: "Review" },
+  ];
+  return <div className="card mini">
+    <div className="mini-bar"><span>Customer credit</span><span className="eyebrow">Paid upfront</span></div>
+    {rows.map((r) => <div className="mini-row" key={r.name}>
+      <span>{r.name}</span>
+      <span className="usage-bar" aria-hidden="true"><span style={{ width: `${Math.round(r.used / r.limit * 100)}%` }} /></span>
+      <span className="num muted">${r.used.toLocaleString("en-US")}</span>
+    </div>)}
+  </div>;
+}
+
+function Verified() {
+  return <svg className="verified" viewBox="0 0 16 16" role="img" aria-label="Verified"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M4.8 8.2l2.1 2.1 4.3-4.5" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+}
+
+const STEPS = [
+  { title: "Provider plugs in", text: "One API, at the provider's checkout.", actor: "Provider" },
+  { title: "Float sets a limit", text: "From repayment history, verified on-chain.", actor: "Float" },
+  { title: "Use now", text: "Float pays the provider upfront.", actor: "Business" },
+  { title: "Settle on Solana", text: "Capped, revocable pulls from the wallet.", actor: "Business and Float" },
+];
 
 export default function App() {
-  const track = useRef<HTMLDivElement>(null);
-  const plate = useRef<HTMLDivElement>(null);
-  const video = useRef<HTMLVideoElement>(null);
-  const hero = useRef<HTMLDivElement>(null);
-  const light = useRef<HTMLDivElement>(null);
-  const dark = useRef<HTMLDivElement>(null);
-  const anchor = useRef<HTMLDivElement>(null);
-  const join = useRef<HTMLDivElement>(null);
   const [payload, setPayload] = useState<Payload | null>(null);
-  const [reduced, setReduced] = useState(false);
+  const firstField = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const preference = matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => {
-      setReduced(preference.matches);
-      if (preference.matches) video.current?.pause();
-      else void video.current?.play().catch(() => { /* The poster stays visible if autoplay is unavailable. */ });
-    };
-    sync();
-    preference.addEventListener("change", sync);
-    return () => preference.removeEventListener("change", sync);
-  }, []);
-
-  // Scrolling walks you through the gate: the plate scales about the doorway until its
-  // light floods the screen, then settles to black and hands over to the form.
-  useEffect(() => {
-    if (reduced) {
-      for (const el of [video, hero, anchor, light, dark, join]) el.current?.removeAttribute("style");
-      plate.current?.style.removeProperty("--plate-scrim");
-      return;
-    }
-    let raf = 0, current = 0, target = 0, running = false;
-    const apply = (p: number) => {
-      const opened = step(0, 1, p);
-      if (video.current) video.current.style.transform = `scale(${1 + 5.2 * opened})`;
-      if (plate.current) plate.current.style.setProperty("--plate-scrim", `${1 - step(0, .5, p)}`);
-      const leaving = step(0, .34, p);
-      if (hero.current) { hero.current.style.opacity = `${1 - leaving}`; hero.current.style.transform = `translate3d(0, ${-34 * leaving}px, 0)`; }
-      // visibility, not just opacity: an invisible control must leave the tab order too.
-      if (anchor.current) { anchor.current.style.opacity = `${1 - leaving}`; anchor.current.style.visibility = leaving > .98 ? "hidden" : "visible"; }
-      if (light.current) light.current.style.opacity = `${step(.44, .8, p)}`;
-      if (dark.current) dark.current.style.opacity = `${step(.76, .94, p)}`;
-      const arriving = step(.86, 1, p);
-      if (join.current) { join.current.style.opacity = `${arriving}`; join.current.style.transform = `translate3d(0, ${22 * (1 - arriving)}px, 0)`; join.current.style.pointerEvents = arriving > .9 ? "auto" : "none"; join.current.style.visibility = arriving < .02 ? "hidden" : "visible"; }
-    };
-    const read = () => {
-      const el = track.current;
-      if (!el) return 0;
-      const span = el.offsetHeight - window.innerHeight;
-      return span <= 0 ? 0 : clamp(-el.getBoundingClientRect().top / span, 0, 1);
-    };
-    const tick = () => {
-      current += (target - current) * .16;
-      if (Math.abs(target - current) < 4e-4) { current = target; running = false; }
-      apply(current);
-      raf = running ? requestAnimationFrame(tick) : 0;
-    };
-    const onScroll = () => {
-      target = read();
-      // rAF is paused while the tab is hidden, so snap rather than leave the frame stale.
-      if (document.hidden) { current = target; apply(current); return; }
-      if (!running) { running = true; if (!raf) raf = requestAnimationFrame(tick); }
-    };
-    const onResize = () => { target = current = read(); apply(current); };
-    onResize();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    document.addEventListener("visibilitychange", onResize);
-    return () => { if (raf) cancelAnimationFrame(raf); window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onResize); document.removeEventListener("visibilitychange", onResize); };
-  }, [reduced]);
-
-  const openGate = useCallback(() => {
-    const el = track.current;
-    if (!el) return;
-    window.scrollTo({ top: el.offsetTop + el.offsetHeight - window.innerHeight, behavior: "smooth" });
-  }, []);
+  const toJoin = (e?: { preventDefault(): void }) => {
+    e?.preventDefault();
+    document.getElementById("access")?.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth" });
+    window.setTimeout(() => firstField.current?.focus({ preventScroll: true }), 600);
+  };
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -93,48 +97,136 @@ export default function App() {
     setPayload({ business: String(data.get("business") ?? ""), community: data.get("community") === "on", socials: String(data.get("socials") ?? "") });
   }
 
-  return <div className="gate" ref={track} data-reduced={reduced || undefined}>
-    <div className="stage">
-      <div className="plate" ref={plate} aria-hidden="true">
-        <video ref={video} className="plate-video" muted loop playsInline preload="metadata" poster="/portal-poster.jpg"><source src={VIDEO_URL} type="video/mp4" /></video>
+  return <div className="app">
+    <header className="topbar">
+      <div className="topbar-inner">
+        <a className="brand" href="/" aria-label="Float home"><img src="/logo.svg" alt="Float" /></a>
+        <nav className="topbar-nav" aria-label="Primary">
+          <a href="#businesses">Businesses</a>
+          <a href="#providers">Providers</a>
+          <a href="#how">How it works</a>
+          <a href={DOCS_URL} target="_blank" rel="noreferrer">Docs</a>
+        </nav>
+        <a className="btn btn-primary btn-sm topbar-action" href="#access" onClick={toJoin}>Get early access</a>
       </div>
-      <div className="veil veil-light" ref={light} aria-hidden="true" />
-      <div className="veil veil-dark" ref={dark} aria-hidden="true" />
-      <header className="topbar">
-        <a className="brand" href="/" aria-label="Float home">
-          <svg viewBox="120 104 169 135" fill="none" aria-hidden="true"><path d="M261.503 110.405C272.627 110.405 281.646 119.423 281.646 130.547V156.183H193.752V178.156H281.646V210.543C281.645 219.55 275.694 227.624 266.897 229.557C247.048 233.919 236.024 232.311 211.147 225.765C193.723 220.282 168.29 221.086 149.759 222.771C137.3 223.904 126 214.31 126 201.799V130.547C126 119.423 135.018 110.405 146.143 110.405H261.503Z" fill="currentColor"/><path d="M195.583 158.014H204.738C209.795 158.014 213.894 162.113 213.894 167.17C213.894 172.226 209.795 176.325 204.738 176.325H195.583V158.014Z" fill="currentColor"/></svg>
-        </a>
-      </header>
-      <main className="hero" ref={hero}>
-        <p className="hero-eyebrow">Early access for Businesses</p>
-        <h1 className="headline">
-          <span className="headline-half headline-left"><span className="headline-line">The future</span><span className="headline-line">of credit</span></span>{" "}
-          <span className="headline-half headline-right"><span className="headline-line">starts with</span><em className="headline-line">reputation.</em></span>
-        </h1>
-      </main>
-      <div className="waitlist-anchor" ref={anchor}>
-        <button className="text-link cta-link" onClick={openGate}>Join the waitlist</button>
-      </div>
-      <footer className="footer">© {new Date().getFullYear()} Float</footer>
+    </header>
 
-      <section className="join" ref={join} aria-labelledby="join-title">
-        <div className="join-card">
-          <h2 id="join-title">Tell us a little.</h2>
-          <p className="join-sub">Three questions, then you’re on the list.</p>
-          <form onSubmit={submit}><fieldset disabled={!!payload}>
-            <label htmlFor="business">What’s your business?</label>
-            <input id="business" name="business" required maxLength={160} autoComplete="organization" placeholder="What you do, or plan to do" pattern={".*\\S.*"} />
-            <label className="check"><input type="checkbox" name="community" /><span>I’d like to be part of a community built on credit reputation.</span></label>
-            <label htmlFor="socials">Socials <span className="optional">optional</span></label>
-            <input id="socials" name="socials" maxLength={200} placeholder="@handle or a link" />
-            <button className="text-link cta-link form-submit" type="submit">Save my place</button>
+    <main>
+      <section className="hero" aria-labelledby="hero-title">
+        <div className="container hero-grid">
+          <div className="hero-copy">
+            <p className="eyebrow">Credit infrastructure on Solana</p>
+            <h1 id="hero-title">Credit for the on&#8209;chain economy.</h1>
+            <p className="lede">Businesses use now and pay later. Providers get paid upfront.</p>
+            <div className="hero-actions">
+              <a className="btn btn-primary btn-lg" href="#access" onClick={toJoin}>Get early access</a>
+              <a className="link-arrow" href="#how">How it works <span aria-hidden="true">→</span></a>
+            </div>
+          </div>
+          <div className="hero-visual">
+            <div className="photo hero-photo"><img src="/images/entry-architecture.jpg" alt="" /></div>
+            <div className="hero-overlay"><ReputationCard /></div>
+            <div className="hero-chip"><LiveChip /></div>
+            <p className="rep-caption">Illustration with sample data.</p>
+          </div>
+        </div>
+      </section>
+
+      <div className="container backers">
+        <p className="eyebrow">Backed by a Solana Foundation grant</p>
+        <p className="eyebrow">Colosseum Radar</p>
+        <p className="eyebrow">Superteam India</p>
+        <p className="eyebrow">Superteam Malaysia</p>
+      </div>
+
+      <section className="section" aria-labelledby="sides-title">
+        <div className="container">
+          <header className="section-head"><div><p className="eyebrow">One credit layer</p><h2 id="sides-title">Built for both sides of the bill.</h2></div></header>
+          <div className="tiles">
+            <article className="tile" id="businesses">
+              <div className="photo tile-photo"><img src="/images/business-owner.jpg" alt="" /></div>
+              <div className="tile-card"><ReputationMini /></div>
+              <p className="eyebrow">Businesses and AI agents</p>
+              <h3>Keep building on credit.</h3>
+              <p className="muted">A limit from your payment history. A record that follows your wallet.</p>
+            </article>
+            <article className="tile" id="providers">
+              <div className="photo tile-photo"><img src="/images/provider-infra.jpg" alt="" /></div>
+              <div className="tile-card"><ProviderCard /></div>
+              <p className="eyebrow">API, RPC and compute providers</p>
+              <h3>Get paid upfront.</h3>
+              <p className="muted">Offer pay-later at checkout. Float carries the credit.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-alt" id="how" aria-labelledby="how-title">
+        <div className="container">
+          <header className="section-head"><div><p className="eyebrow">Process</p><h2 id="how-title">How it works</h2></div>
+            <a className="link-arrow" href={DOCS_URL} target="_blank" rel="noreferrer">API reference <span aria-hidden="true">↗</span></a>
+          </header>
+          <ol className="steps">
+            {STEPS.map((s, i) => <li key={s.title} className="step">
+              <span className="step-num mono" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+              <h3>{s.title}</h3><p>{s.text}</p><p className="step-actor">{s.actor}</p>
+            </li>)}
+          </ol>
+        </div>
+      </section>
+
+      <section className="image-band" aria-label="Private beta">
+        <div className="photo"><img src="/images/provider-code.jpg" alt="" /></div>
+        <div className="container image-band-text">
+          <p className="eyebrow">Private beta</p>
+          <p className="image-band-quote">Live with Solami. Settled on Solana.</p>
+        </div>
+      </section>
+
+      <section className="section" id="team" aria-labelledby="team-title">
+        <div className="container">
+          <header className="section-head"><div><p className="eyebrow">Leadership</p><h2 id="team-title">Led by Solana operators.</h2></div></header>
+          <ul className="people">
+            <li><p className="person-name">Samisha</p><p className="eyebrow">Co-founder &amp; CEO</p><p className="muted">GreenKWh, 1st in DePIN at Colosseum Radar. Superteam India.</p><a className="link-arrow" href="https://x.com/samisha_x" target="_blank" rel="noreferrer">@samisha_x <span aria-hidden="true">↗</span></a></li>
+            <li><p className="person-name">Alia</p><p className="eyebrow">Co-founder &amp; CTO</p><p className="muted">Top 5 in Infrastructure at Colosseum Radar. Pudgy Asia. Superteam Malaysia.</p><a className="link-arrow" href="https://x.com/_alialee" target="_blank" rel="noreferrer">@_alialee <span aria-hidden="true">↗</span></a></li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="section section-alt" id="access" aria-labelledby="access-title">
+        <div className="container access">
+          <div><p className="eyebrow">Early access</p><h2 id="access-title" className="section-title">Get on credit early.</h2><p className="section-sub">We onboard businesses alongside new providers.</p></div>
+          <form className="card access-form" onSubmit={submit}><fieldset disabled={!!payload}>
+            <div className="field"><label htmlFor="business">Your business</label><input ref={firstField} id="business" name="business" required maxLength={160} autoComplete="organization" placeholder="What you do, or plan to do" pattern={".*\\S.*"} /></div>
+            <div className="field"><label htmlFor="socials">X or website <span className="optional">optional</span></label><input id="socials" name="socials" maxLength={200} placeholder="@handle or a link" /></div>
+            <label className="check"><input type="checkbox" name="community" /><span>Join the Float community</span></label>
+            <button className="btn btn-primary btn-lg btn-block" type="submit">Save my place</button>
           </fieldset></form>
         </div>
       </section>
-    </div>
+    </main>
+
+    <footer className="site-footer">
+      <div className="container site-footer-inner">
+        <img src="/logo.svg" alt="Float" />
+        <nav className="footer-links" aria-label="Footer">
+          <a href={DOCS_URL} target="_blank" rel="noreferrer">Docs</a>
+          <a href={X_URL} target="_blank" rel="noreferrer">X</a>
+        </nav>
+        <p>© {new Date().getFullYear()} Float. Credit infrastructure on Solana.</p>
+      </div>
+    </footer>
 
     {payload && <Suspense fallback={<p className="auth-status" role="status">Opening secure sign-in…</p>}>
       <Waitlist payload={payload} onClose={() => setPayload(null)} />
     </Suspense>}
+  </div>;
+}
+
+function ReputationMini() {
+  return <div className="card mini">
+    <div className="mini-bar"><span>Business XYZ</span><span className="badge badge-dot">Connected</span></div>
+    <div className="mini-score"><p className="num">82<span>/100</span></p><p className="eyebrow">Float score</p></div>
+    <div className="meter" aria-hidden="true"><span style={{ width: "82%" }} /></div>
   </div>;
 }
