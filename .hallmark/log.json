@@ -1,0 +1,23 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "polish",
+  "scope": "page",
+  "prompt": "pre-launch page for on-chain pay-later credit; join the early-access waitlist",
+  "fixed": [
+   "24b",
+   "26b",
+   "34",
+   "40",
+   "48",
+   "50",
+   "54",
+   "58",
+   "63",
+   "64",
+   "67"
+  ],
+  "waived": [],
+  "date": "2026-11-18"
+ }
+]

@@ -21,9 +21,9 @@ export default createWaitlistHandler({
     return profile.linked_accounts.find(account => account.type === "email")?.address
       ?? profile.linked_accounts.find(account => account.type === "google_oauth")?.email;
   },
-  save: async ({ privyId, email, business, community, socials }) => {
-    await db()`INSERT INTO waitlist_entries (privy_id, email, business, community_interest, socials, consent_version)
-      VALUES (${privyId}, ${email}, ${business}, ${community}, ${socials}, 'early-access-v1')
+  save: async ({ privyId, email, role, business, community, socials }) => {
+    await db()`INSERT INTO waitlist_entries (privy_id, email, role, business, community_interest, socials, consent_version)
+      VALUES (${privyId}, ${email}, ${role}, ${business}, ${community}, ${socials}, 'early-access-v1')
       ON CONFLICT (privy_id) DO NOTHING`;
   },
 });

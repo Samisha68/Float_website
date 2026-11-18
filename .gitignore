@@ -11,3 +11,8 @@ yarn-debug.log*
 yarn-error.log*
 *.tsbuildinfo
 .DS_Store
+
+# Agent skills
+.agents/
+.claude/
+skills-lock.json

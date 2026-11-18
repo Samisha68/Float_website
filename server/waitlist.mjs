@@ -19,6 +19,7 @@ export function createWaitlistHandler({ configured, verify, getEmail, save, log 
     if (!body || typeof body !== "object" || Array.isArray(body)) return reply(400, "INVALID_JSON");
     const text = (value, max) => typeof value === "string" && value.length <= max && !/[\u0000-\u001f\u007f]/.test(value);
     const socials = body.socials == null || body.socials === "" ? null : body.socials;
+    if (body.role !== "user" && body.role !== "provider") return reply(400, "INVALID_ROLE");
     if (!text(body.business, 160) || body.business.trim().length === 0) return reply(400, "INVALID_BUSINESS");
     if (typeof body.community !== "boolean") return reply(400, "INVALID_COMMUNITY");
     if (socials !== null && !text(socials, 200)) return reply(400, "INVALID_SOCIALS");
@@ -34,7 +35,7 @@ export function createWaitlistHandler({ configured, verify, getEmail, save, log 
     try {
       const email = await getEmail(identity.sub);
       if (typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return reply(422, "VERIFIED_EMAIL_REQUIRED");
-      await save({ privyId: identity.sub, email: email.toLowerCase(), business: body.business.trim(), community: body.community, socials: socials === null ? null : socials.trim() || null });
+      await save({ privyId: identity.sub, email: email.toLowerCase(), role: body.role, business: body.business.trim(), community: body.community, socials: socials === null ? null : socials.trim() || null });
       log(JSON.stringify({ event: "waitlist.saved", requestId }));
       return reply(200);
     } catch (error) {
